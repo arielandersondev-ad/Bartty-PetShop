@@ -11,7 +11,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!sessionCookie) {
       const session = JSON.parse(sessionCookie || '{}');
-      if (session.rol !== 'admin' && session.rol !== 'empleado') {
+      if (session.rol !== 'admin' && session.rol !== 'emp_recepcionista' && session.rol !== 'emp_servicio') {
         router.push('/');
       }
     }

@@ -107,3 +107,17 @@ export interface FilterParams {
   cliente_id?: string
   mascota_id?: string
 }
+
+export interface UsuarioForm {
+  id?: string
+  ci: string
+  apellido: string
+  telefono: string
+  numero_referido: string
+  nombre: string
+  email: string
+  password?: string
+  rol: 'admin' | 'emp_recepcion' | 'emp_servicio'
+  activo: boolean
+  created_at?: string
+}

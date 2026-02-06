@@ -43,20 +43,17 @@ export default function AdminNav({ isSidebarOpen, setIsSidebarOpen, handleCurren
         </div>
       </nav>
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-20 w-64 md:w-80 bg-gradient-to-b from-[#8B4513] to-[#D2691E] transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out shadow-2xl`}>
+      <div className={`fixed inset-y-0 left-0 z-20 w-64 md:w-80 bg-gradient-to-this.first = this.first.bind(this) from-[#8B4513] to-[#D2691E] transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out shadow-2xl pt-5`}>
         <div className="p-5 flex h-full">
           <div className="text-center max-w-md w-full">
-            <button
-              onClick={() => setIsSidebarOpen(false)}
-              className="mb-8 text-white hover:text-[#FF8C00] transition-colors"
-            >
-              <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <h1 className="text-2xl md:text-3xl font-bold text-white mb-8">
-              {nombre || 'Usuario'} - {rol || 'Administracion'} 
-            </h1>
+            <div className="text-2xl md:text-3xl font-bold text-white mb-8 flex flex-col gap-5">
+              <div>
+                {rol || 'Administracion'}
+              </div>
+              <div>
+                {nombre || 'Usuario'}
+              </div>
+            </div>
             <ul className="space-y-4">
               <li>
                 <button
@@ -96,6 +93,14 @@ export default function AdminNav({ isSidebarOpen, setIsSidebarOpen, handleCurren
                   className="w-full text-left bg-white bg-opacity-20 hover:bg-opacity-30 text-black font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md backdrop-blur-sm border border-white border-opacity-20"
                 >
                   📄 Reportes
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => { router.push('/admin/usuarios'); setIsSidebarOpen(false); }}
+                  className="w-full text-left bg-white bg-opacity-20 hover:bg-opacity-30 text-black font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md backdrop-blur-sm border border-white border-opacity-20"
+                >
+                  😶‍🌫️ Usuarios
                 </button>
               </li>
             </ul>

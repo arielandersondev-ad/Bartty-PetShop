@@ -180,7 +180,7 @@ export function DynamicTable<T extends Record<string, any>>({
 
       case 'status':
         const statusOption = column.statusOptions?.find(
-          (opt) => opt.value === value
+          (opt) => opt.value === String(value)
         );
         return (
           <span
@@ -259,7 +259,7 @@ export function DynamicTable<T extends Record<string, any>>({
                     column.sortable !== false && handleSort(column.key as string)
                   }
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2" >
                     {column.label}
                     {column.sortable !== false && sortConfig?.key === column.key && (
                       <span className="text-blue-600">
@@ -296,7 +296,11 @@ export function DynamicTable<T extends Record<string, any>>({
                   } transition-colors`}
                 >
                   {columns.map((column, colIndex) => (
-                    <td key={colIndex} className="px-4 py-3 text-sm text-gray-900">
+                    <td 
+                      key={colIndex} 
+                      className="px-4 py-3 text-sm text-gray-900 overflow-hidden text-ellipsis whitespace-nowrap"
+                      style={{ width: column.width, maxWidth: column.width }}
+                    >
                       {renderCell(column, row)}
                     </td>
                   ))}
