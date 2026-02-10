@@ -2,8 +2,13 @@
 import { useEffect, useState } from "react"
 import {  UsuarioForm } from "@/types"
 import { ActionButton, ColumnConfig, DynamicTable } from "../components/DynamicTable";
+import Cookies from "js-cookie";
+import { useRouter } from 'next/navigation';
 export default function Usuarios() {
 
+  const sesionCookie = Cookies.get('session');
+  const rol = sesionCookie ? JSON.parse(sesionCookie).rol : null;
+  const router = useRouter();
   const dataExample = {
     id: '',
     ci: '',
@@ -138,9 +143,15 @@ export default function Usuarios() {
   }
 
   useEffect(() => {
+    if (!sesionCookie) {
+      router.push('/login');
+    }
+    if (rol !== 'admin') {
+      router.push('/admin');
+    }
     const loadUsuarios = async () => {await fetchUsuarios();}
     loadUsuarios();
-  },[])
+  },[sesionCookie, router,rol]);
   
   return (
     <div className="bg-[#fff8e1] flex flex-col md:flex-row gap-8 mt-20">

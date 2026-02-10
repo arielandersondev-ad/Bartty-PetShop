@@ -72,22 +72,10 @@ export default function CitasAdmin() {
 
   const actions: ActionButton<Cita>[] = [
     {
-      label: 'Confirmar',
-      onClick: (row) => cambiarEstado(row.id, 'confirmado'),
-      variant: 'azul',
-      show: (row) => row.estado === 'pendiente',
-    },
-    {
-      label: 'Atender',
-      onClick: (row) => cambiarEstado(row.id, 'atendido'),
-      variant: 'amarillo',
-      show: (row) => row.estado === 'confirmado',
-    },
-    {
       label: 'Cancelar',
       onClick: (row) => cambiarEstado(row.id, 'cancelado'),
       variant: 'rojo',
-      show: (row) => row.estado === 'confirmado' || row.estado === 'atendido',
+      show: (row) => row.estado === 'confirmado' || row.estado === 'atendido' || row.estado === 'pendiente',
     },
     {
       label: 'Detalles',
@@ -165,7 +153,7 @@ export default function CitasAdmin() {
         </div>
       </div>
       {modal === 'detalles' && (
-        <div className="fixed inset-100 z-50 flex items-center justify-center">
+        <div className="fixed inset-100 z-50 flex items-center justify-center w-auto">
           <div className= "rounded-lg overflow-y-auto">
             <button className='bg-[#fff8e1] border-2 px-2 border-[#D2691E] rounded-lg hover:bg-[#FFD700]' onClick={() => setModal('')}>X</button>
             <Detailcita

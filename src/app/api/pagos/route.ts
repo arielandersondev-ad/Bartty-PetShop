@@ -1,19 +1,37 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { error } from 'console';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const cita_id = searchParams.get('cita_id');
-  if (!cita_id) return NextResponse.json({ error: 'cita_id requerido' }, { status: 400 });
-  const { data, error } = await supabase
-    .from('pagos')
-    .select('*')
-    .eq('cita_id', cita_id)
-    .order('created_at', { ascending: false });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+  const cita_id = searchParams.get('cita_id');
+  const id_cita_pago = searchParams.get('id_cita_pago');
+
+  if (cita_id) {
+    const { data, error } = await supabase
+      .from('pagos')
+      .select('*')
+      .eq('cita_id', cita_id)
+      .order('created_at', { ascending: false });
+
+    if (error) {return NextResponse.json({ error: error.message }, { status: 500 });}
+    return NextResponse.json(data);
+  }
+
+  if (id_cita_pago) {
+    const { data, error } = await supabase
+      .from('pagos_cita_totales')
+      .select('*')
+      .eq('cita_id', id_cita_pago)
+      .single();
+
+    if (error) {return NextResponse.json({ error: error.message }, { status: 500 });}
+    return NextResponse.json(data);
+  }
+  return NextResponse.json({ error: 'Debe enviar cita_id o id_cita_pago' },{ status: 400 });
 }
+
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -43,6 +61,20 @@ export async function PATCH(req: Request) {
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
+}
+
+export async function DELETE (req: Request) {
+  const { searchParams } = new URL(req.url)
+  const id = searchParams.get('id_pago')
+  if (!id){return NextResponse.json({error: 'id_pago requerido'},{status: 400})}
+  const {data, error} = await supabase
+    .from('pagos')
+    .delete()
+    .eq('id',id)
+    .select()
+
+  if(error) return NextResponse.json({error: error.message},{status:500})
+  return NextResponse.json(data)
 }

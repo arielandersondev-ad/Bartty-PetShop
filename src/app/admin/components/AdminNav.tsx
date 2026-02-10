@@ -87,22 +87,26 @@ export default function AdminNav({ isSidebarOpen, setIsSidebarOpen, handleCurren
                   📦 Inventario
                 </button>
               </li>
-              <li>
-                <button
-                  onClick={() => { router.push(''); setIsSidebarOpen(false); }}
-                  className="w-full text-left bg-white bg-opacity-20 hover:bg-opacity-30 text-black font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md backdrop-blur-sm border border-white border-opacity-20"
-                >
-                  📄 Reportes
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => { router.push('/admin/usuarios'); setIsSidebarOpen(false); }}
-                  className="w-full text-left bg-white bg-opacity-20 hover:bg-opacity-30 text-black font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md backdrop-blur-sm border border-white border-opacity-20"
-                >
-                  😶‍🌫️ Usuarios
-                </button>
-              </li>
+              {rol === 'admin' && (
+                <li>
+                  <button
+                    onClick={() => { router.push(''); setIsSidebarOpen(false); }}
+                    className="w-full text-left bg-white bg-opacity-20 hover:bg-opacity-30 text-black font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md backdrop-blur-sm border border-white border-opacity-20"
+                  >
+                    📄 Reportes
+                  </button>
+                </li>
+              )}
+              {rol === 'admin' && (
+                <li>
+                  <button
+                    onClick={() => { router.push('/admin/usuarios'); setIsSidebarOpen(false); }}
+                    className="w-full text-left bg-white bg-opacity-20 hover:bg-opacity-30 text-black font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md backdrop-blur-sm border border-white border-opacity-20"
+                  >
+                    😶‍🌫️ Usuarios
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
         </div>

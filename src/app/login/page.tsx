@@ -10,7 +10,7 @@ export default function Login() {
     email: '',
     password: '',
     nombre: '',
-    rol: 'empleado'
+    rol: ''
   })
   const [loading, setLoading] = useState(false)
   const [mensaje, setMensaje] = useState('')
@@ -25,7 +25,6 @@ export default function Login() {
     e.preventDefault()
     setLoading(true)
     setMensaje('')
-    //router.push('/admin')
 
     try {
       const res = await fetch('/api/usuario', {
@@ -46,7 +45,7 @@ export default function Login() {
         if (data.token) {
           localStorage.setItem('token', data.token)
         }
-        if (data.usuario.rol === 'admin' || data.usuario.rol === 'empleado') {
+        if (data.usuario.rol === 'admin' || data.usuario.rol === 'emp_recepcion' || data.usuario.rol === 'emp_servicio') {
           const session = {
             id: data.usuario.id,
             nombre: data.usuario.nombre,
@@ -58,6 +57,7 @@ export default function Login() {
       }
     } catch (error) {
       setMensaje('Error de conexión. Intenta de nuevo.')
+      console.error('Error:', error)
     }
     setLoading(false)
   }
@@ -147,6 +147,7 @@ export function LoginClinte({onCurrentView}: LoginClinteType){
       }
     } catch (error) {
       setMensaje('Error de conexión. Intenta de nuevo.')
+      console.error('Error:', error)
     }
     setLoading(false)
   }
