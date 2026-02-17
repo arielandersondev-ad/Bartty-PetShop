@@ -63,7 +63,7 @@ export default function Servicio({usuario_id, cita_id, rol}: {usuario_id?: strin
   
   return (
     <div>
-      {rol === 'admin' || rol === 'emp_servicio' && (
+      {(rol === 'admin' || rol === 'emp_servicio') && (
         <>
           <h2 className="text-center mb-3 text-2xl text-[#D2691E]">Servicios</h2>
           <form onSubmit={handlerSubmit} className="flex flex-row gap-4">
@@ -108,7 +108,7 @@ export default function Servicio({usuario_id, cita_id, rol}: {usuario_id?: strin
               <div className="flex flex-row gap-2 justify-evenly w-full">
                 <div className="text-[#8B4513]">{s.servicio}</div>
                 <div className=" text-gray-600">Precio: {Number(s.valor).toFixed(2)} Bs</div>
-                {rol === 'admin' || rol === 'emp_servicio' && (
+                {(rol === 'admin' || rol === 'emp_servicio') && (
                   <button className="bg-red-500 rounded-full p-1 text-white px-2" onClick={() => handleDelete(s.id)}>Eliminar</button>
                 )}
               </div>

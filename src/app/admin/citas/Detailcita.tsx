@@ -170,7 +170,7 @@ export default function Detailcita({ citaDetail, onRefresh }: { citaDetail: Cita
           rol={rol}
         />
       </div>
-      {rol === "admin" || rol === 'emp_recepcion' && (
+      {(rol === "admin" || rol === 'emp_recepcion') && (
       <PagoForm
         citaId={citaDetail.id}
         saldo={totalCita}

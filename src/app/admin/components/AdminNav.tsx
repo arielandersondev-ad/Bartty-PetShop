@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import { useEffect, useState } from 'react';
 
 interface AdminNavProps {
   isSidebarOpen: boolean;
@@ -14,6 +15,12 @@ export default function AdminNav({ isSidebarOpen, setIsSidebarOpen, handleCurren
   const sessionCookie = Cookies.get('session');
   const sesion = JSON.parse(sessionCookie || '{}');
   const {rol, nombre} = sesion;
+  const [mounted, setMounted]=useState(false)
+  useEffect(() => {
+    const load = async () => setMounted(true)
+    load()
+  }, [])
+  if (!mounted) return null
 
   return (
     <>
@@ -90,7 +97,7 @@ export default function AdminNav({ isSidebarOpen, setIsSidebarOpen, handleCurren
               {rol === 'admin' && (
                 <li>
                   <button
-                    onClick={() => { router.push(''); setIsSidebarOpen(false); }}
+                    onClick={() => { router.push('/admin/reportes'); setIsSidebarOpen(false); }}
                     className="w-full text-left bg-white bg-opacity-20 hover:bg-opacity-30 text-black font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md backdrop-blur-sm border border-white border-opacity-20"
                   >
                     📄 Reportes

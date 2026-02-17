@@ -1,0 +1,7 @@
+.wrapper :global(.rdrDefinedRangesWrapper) {
+  display: none;
+}
+
+.wrapper :global(.rdrDateRangeWrapper) {
+  width: 100%;
+}
