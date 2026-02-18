@@ -4,7 +4,6 @@ import { DynamicTable, ColumnConfig, ActionButton } from '../components/DynamicT
 import { customStyles } from '@/styles/colors';
 import { Cita } from '@/types/citas';
 import Detailcita from './Detailcita';
-
 export default function CitasAdmin() {
 
   const [allcitas, setAllCitas] = useState<Cita[]>([])
@@ -72,12 +71,6 @@ export default function CitasAdmin() {
 
   const actions: ActionButton<Cita>[] = [
     {
-      label: 'Cancelar',
-      onClick: (row) => cambiarEstado(row.id, 'cancelado'),
-      variant: 'rojo',
-      show: (row) => row.estado === 'confirmado' || row.estado === 'atendido' || row.estado === 'pendiente',
-    },
-    {
       label: 'Detalles',
       onClick: (row) => detallesEspecificos(row.id),
       variant: 'amarillo',
@@ -102,14 +95,6 @@ export default function CitasAdmin() {
     }
   }
 
-  const cambiarEstado = async (id: string, nuevoEstado: Cita['estado']) => {
-    if (nuevoEstado === 'detalles'){
-      setDetail({} as Cita);
-      setModal('detalles');
-      await fetchCitaDetail(id);
-      return;
-    }
-  };
   const detallesEspecificos = async (id: string) => {
     setDetail({} as Cita);
     await fetchCitaDetail(id);
@@ -122,24 +107,16 @@ export default function CitasAdmin() {
   }, [])
 
   return (
-    <div className='text-black min-h-screen bg-[#FFF8E1] mt-10'>
-      <div className='p-6'>
+    <div className='text-black bg-[#FFF8E1] mt-4 md:mt-10 overflow-x-hidden'>
+      <div className='px-4 md:px-6 py-4 md:py-6'>
+
         <div className='mb-8'>
-          <h1 className="text-3xl font-bold text-[#8B4513] mb-2">Gestión de Citas</h1>
-          <p className="text-[#D2691E]">Administra las citas de la peluquería canina</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#8B4513] mb-1">Gestión de Citas</h1>
+          <p className="text-sm md:text-base text-[#D2691E]">Administra las citas de la peluquería canina</p>
         </div>
 
-        <div className={`${customStyles.card.base} rounded-lg p-6`}>
-          <div className='flex flex-row justify-between m-2'>
-            <h2 className="text-xl font-semibold text-[#8B4513] mb-4">Lista de Citas</h2>
-            <button 
-              onClick={fetchCitas} 
-              className={`${customStyles.button.primary} px-6 py-2 rounded-lg font-medium transition-colors`}
-            >
-              Refrescar
-            </button>
-
-          </div>
+        <div className={`${customStyles.card.base} rounded-xl p-4 md:p-6`}>
+          <h2 className="text-xl font-semibold text-[#8B4513] mb-4">Lista de Citas</h2>
           <DynamicTable
             data={allcitas}
             columns={columns}
@@ -153,16 +130,36 @@ export default function CitasAdmin() {
         </div>
       </div>
       {modal === 'detalles' && (
-        <div className="fixed inset-100 z-50 flex items-center justify-center w-auto">
-          <div className= "rounded-lg overflow-y-auto">
-            <button className='bg-[#fff8e1] border-2 px-2 border-[#D2691E] rounded-lg hover:bg-[#FFD700]' onClick={() => setModal('')}>X</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          
+          <div className="bg-[#fff8e1] 
+                          w-[90vw] 
+                          md:w-[34vw] 
+                          max-h-[90vh] 
+                          overflow-y-auto 
+                          rounded-xl 
+                          shadow-2xl 
+                          border-2 
+                          border-[#D2691E] 
+                          p-6 
+                          relative">
+
+            <button
+              className="absolute top-3 right-3 bg-white border border-[#D2691E] px-3 py-1 rounded-lg hover:bg-[#FFD700]"
+              onClick={() => setModal('')}
+            >
+              ✕
+            </button>
+
             <Detailcita
               citaDetail={detail}
               onRefresh={fetchCitas}
             />
+
           </div>
         </div>
       )}
+
     </div>
   );
 }

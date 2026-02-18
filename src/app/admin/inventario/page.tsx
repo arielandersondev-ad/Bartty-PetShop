@@ -128,7 +128,7 @@ export default function InventarioAdmin() {
   ];
 
   return (
-    <div className='text-black min-h-screen bg-[#FFF8E1] mt-10'>
+    <div className='text-black min-h-screen bg-[#FFF8E1] mt-10 overflow-x-hidden'>
       <div className='p-6'>
         <div className='mb-8'>
           <h1 className="text-3xl font-bold text-[#8B4513] mb-2">Inventario</h1>

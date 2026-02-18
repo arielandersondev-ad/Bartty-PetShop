@@ -16,6 +16,7 @@ export type ReportDetail = {
 }
 export type ReportEmpServDetail = {
   fecha_servicio: string
+  fecha_cita:string
   servicio: string
   monto_servicio: number
 }

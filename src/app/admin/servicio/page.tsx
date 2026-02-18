@@ -62,60 +62,87 @@ export default function Servicio({usuario_id, cita_id, rol}: {usuario_id?: strin
   }, [cita_id])
   
   return (
-    <div>
-      {(rol === 'admin' || rol === 'emp_servicio') && (
-        <>
-          <h2 className="text-center mb-3 text-2xl text-[#D2691E]">Servicios</h2>
-          <form onSubmit={handlerSubmit} className="flex flex-row gap-4">
-            <div className="border border-[#D2691E] rounded-full p-2">
-              <input 
-                className="border-none outline-none text-center focus:ring-0"
-                type="text" 
-                name="servicio" 
-                id="servicio" 
-                placeholder="Nombre del servicio"
-                onChange={handleChange}
-              />
-            </div>
-            <div className="border border-[#D2691E] rounded-full p-2">
-              <input 
-                className="w-20 border-none outline-none text-center focus:ring-0"
-                type="number" 
-                name="valor" 
-                id="valor" 
-                placeholder="Bs" 
-                onChange={handleChange}
-              />
-            </div>
-            <div className="bg-green-600 rounded-full font-extrabold size-lg text-white hover:bg-green-700 p-2">
-              <button 
-                
-                type="submit"
-              >Agregar</button>
-            </div>
-          </form>
-        </>
-      )}
-      <div className=" text-center font-semibold text-[#8B4513] mb-2">
-        Lista de servicios
+    <div className=" p-4 bg-white shadow-sm space-y-4">
+
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-base font-semibold text-[#8B4513]">
+          Servicios
+        </h2>
+        <span className="text-xs text-gray-500">
+          {servicios.length} registrados
+        </span>
       </div>
-      {servicios.length === 0 ? (
-        <div className="m-4 text-sm text-gray-600 text-center">No hay servicios registrados.</div>
-      ) : (
-        <ul className= "space-y-2 flex flex-wrap gap-2">
-          {servicios.map(s => (
-            <li key={s.id} className="flex justify-between items-center border p-2 rounded m-0">
-              <div className="flex flex-row gap-2 justify-evenly w-full">
-                <div className="text-[#8B4513]">{s.servicio}</div>
-                <div className=" text-gray-600">Precio: {Number(s.valor).toFixed(2)} Bs</div>
-                {(rol === 'admin' || rol === 'emp_servicio') && (
-                  <button className="bg-red-500 rounded-full p-1 text-white px-2" onClick={() => handleDelete(s.id)}>Eliminar</button>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
+
+      {/* Formulario */}
+      {(rol === 'admin' || rol === 'emp_servicio') && (
+        <form
+          onSubmit={handlerSubmit}
+          className="grid grid-cols-1 md:grid-cols-3 gap-3"
+        >
+          <input
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D2691E]"
+            type="text"
+            name="servicio"
+            placeholder="Nombre del servicio"
+            value={form.servicio}
+            onChange={handleChange}
+          />
+
+          <input
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D2691E]"
+            type="number"
+            name="valor"
+            placeholder="Monto en Bs"
+            value={form.valor || ''}
+            onChange={handleChange}
+          />
+
+          <button
+            type="submit"
+            className="w-full py-2 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 transition-all"
+          >
+            Agregar servicio
+          </button>
+        </form>
       )}
+
+      {/* Lista */}
+      <div className="border-t pt-3 space-y-2">
+
+        {servicios.length === 0 ? (
+          <div className="text-sm text-gray-500 text-center">
+            No hay servicios registrados.
+          </div>
+        ) : (
+          <ul className="space-y-2 mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+            {servicios.map(s => (
+              <li
+                key={s.id}
+                className="flex justify-between items-center bg-[#fff8e1] border border-[#D2691E] rounded-lg px-3 py-2 m-0"
+              >
+                <div>
+                  <div className="text-sm font-medium text-[#8B4513]">
+                    {s.servicio}
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    Bs {Number(s.valor).toFixed(2)}
+                  </div>
+                </div>
+
+                {(rol === 'admin' || rol === 'emp_servicio') && (
+                  <button
+                    onClick={() => handleDelete(s.id)}
+                    className="text-xs px-3 py-1 rounded-md bg-red-500 text-white hover:bg-red-600 transition-all"
+                  >
+                    Eliminar
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   )
 }

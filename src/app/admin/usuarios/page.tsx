@@ -153,9 +153,9 @@ export default function Usuarios() {
     loadUsuarios();
   },[sesionCookie, router,rol]);
   
-  return (
-    <div className="bg-[#fff8e1] flex flex-col md:flex-row gap-8 mt-20">
-      <div className="w-1/3 border-2 border-[#D2691E] rounded-lg p-4">
+return (
+    <div className="bg-[#fff8e1] min-h-screen flex flex-col md:flex-row gap-8 mt-20 p-4 overflow-x-hidden">
+      <div className="md:w-1/3 border-2 border-[#D2691E] rounded-lg p-4">
         <h1 className="text-[#D2691E] text-center">Registro de Usuario</h1>
 
         <form onSubmit={handleSubmit} className="flex flex-col text-black gap-2 text-center">
@@ -301,7 +301,7 @@ export default function Usuarios() {
 
         {mensaje && <p>{mensaje}</p>}
       </div>
-      <div className="w-3/3 border-2 border-[#D2691E] rounded-lg p-4">
+      <div className="md:w-3/3 border-2 border-[#D2691E] rounded-lg p-4">
         <div className= "my-2 flex flex-row justify-between">
           <h1 className="text-black">Lista de Usuarios</h1>
           <button className="bg-[#D2691E] text-white px-4 py-2 rounded-lg hover:bg-[#B85C00] transition-colors" onClick={() => fetchUsuarios()}>refrescar</button>

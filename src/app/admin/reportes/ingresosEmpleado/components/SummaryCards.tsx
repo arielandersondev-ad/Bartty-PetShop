@@ -40,7 +40,7 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
   ];
 
   return (
-    <div className="flex flex-col flex-wrap md:flex-row gap-6">
+    <div className="flex flex-col md:flex-row flex-wrap justify-between gap-6">
       {cards.map((card, index) => (
         <div
           key={index}

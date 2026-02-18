@@ -7,5 +7,5 @@ export interface Cita {
   tipo_corte?:string
   observaciones: string
   mascota: {nombre: string}
-  cliente: {nombre: string, apellido_paterno: string}
+  cliente: {ci:string, telefono:string,nombre: string, apellido_paterno: string}
 }

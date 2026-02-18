@@ -54,7 +54,7 @@ export default function IngresosReportePage() {
   
 
   return (
-    <div className='text-black min-h-screen bg-[#FFF8E1] p-6 mt-10'>
+    <div className='text-black min-h-screen bg-[#FFF8E1] p-6 mt-10 overflow-x-hidden'>
       <div className='mb-8'>
         <div className="flex justify-between items-start">
           <div>

@@ -17,7 +17,7 @@ export interface ActionButton<T = any> {
   label: string;
   icon?: React.ReactNode;
   onClick: (row: T) => void;
-  variant?: 'azul' | 'amarillo' | 'rojo' | 'naranja';
+  variant?: 'azul' | 'amarillo' | 'rojo' | 'naranja' | 'verde';
   show?: (row: T) => boolean;
 }
 
@@ -206,7 +206,7 @@ export function DynamicTable<T extends Record<string, any>>({
     <div className={`w-full ${className}`}>
       {/* Barra de búsqueda y filtros */}
       {showSearch && (
-        <div className="mb-4 flex flex-wrap gap-3">
+        <div className="mb-4 flex flex-col md:flex-wrap gap-3">
           <input
             type="text"
             placeholder="Buscar..."
@@ -316,6 +316,7 @@ export function DynamicTable<T extends Record<string, any>>({
                             amarillo: 'bg-yellow-500 hover:bg-yellow-600 text-white',
                             rojo: 'bg-red-600 hover:bg-red-700 text-white',
                             naranja: 'bg-orange-500 hover:bg-orange-600 text-white',
+                            verde: 'bg-green-500 hover:bg_green-600 text-black',
                             neutro: 'bg-gray-500 hover:bg-gray-600 text-white',
                           };
 

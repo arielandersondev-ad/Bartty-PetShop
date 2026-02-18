@@ -1,42 +1,20 @@
 "use client";
-import { useState } from 'react';
 import { customStyles } from '@/styles/colors';
-import { type ReportData, type DateRange } from './types';
+import { type ReportDataEmpServ, type DateRange } from './types';
 import { IncomeReportPDF } from './pdf/IncomeReportPDF';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 
+
 interface PDFExportButtonProps {
-  data: ReportData;
+  data: ReportDataEmpServ;
   dateRange: DateRange;
 }
 
 export function PDFExportButton({ data, dateRange }: PDFExportButtonProps) {
-  console.log('data on button pdf',data)
-  console.log('dataRange on button pdf',dateRange)
-  const [isGenerating, setIsGenerating] = useState(false);
-
-  const handleGeneratePDF = async () => {
-    setIsGenerating(true);
-    
-    try {
-      // Simulación de generación del PDF
-      // En un caso real, aquí se generaría el PDF usando @react-pdf/renderer
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Mostrar mensaje de éxito
-      alert('PDF generado con éxito (simulación)');
-    } catch (error) {
-      console.error('Error al generar PDF:', error);
-      alert('Error al generar el PDF');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   return (
     <PDFDownloadLink
       document={<IncomeReportPDF data={data} dateRange={dateRange} />}
-      fileName={`reporte_ingresos_${dateRange.startDate}_${dateRange.endDate}.pdf`}
+      fileName={`reporte_ingresos_${new Date(dateRange.startDate).toISOString().slice(0,10)}_${new Date(dateRange.endDate).toISOString().slice(0,10)}.pdf`}
       className={`
         ${customStyles.button.primary}
         px-6 py-3 rounded-lg font-medium

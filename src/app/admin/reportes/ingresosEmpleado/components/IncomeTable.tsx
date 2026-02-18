@@ -7,11 +7,9 @@ interface IncomeTableProps {
 
 export function IncomeTable({ data }: IncomeTableProps) {
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    if (!dateString) return ''
+    const [year,month, day] = dateString.split('-')
+    return `${day}/${month}/${year}` 
   };
 
 const formatCurrency = (amount?: number) => {
@@ -19,7 +17,7 @@ const formatCurrency = (amount?: number) => {
 }
 
   useEffect(() => {
-    console.log('data dentro del Income: ',data)
+    console.log('data dentro de la tabla: ',data)
   }, [data])
   
   return (
@@ -27,7 +25,7 @@ const formatCurrency = (amount?: number) => {
       <table className="w-full">
         <thead>
           <tr className="border-b-2 border-[#D2691E]">
-            <th className="text-left py-3 px-4 font-semibold text-[#8B4513]">Fecha</th>
+            <th className="text-left py-3 px-4 font-semibold text-[#8B4513]">Fecha_servicio</th>
             <th className="text-left py-3 px-4 font-semibold text-[#8B4513]">Servicio</th>
             <th className="text-left py-3 px-4 font-semibold text-[#8B4513]">Monto</th>
           </tr>

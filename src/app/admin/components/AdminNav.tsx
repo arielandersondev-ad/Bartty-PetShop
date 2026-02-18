@@ -7,10 +7,9 @@ import { useEffect, useState } from 'react';
 interface AdminNavProps {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (open: boolean) => void;
-  handleCurrentContent: () => void;
 }
 
-export default function AdminNav({ isSidebarOpen, setIsSidebarOpen, handleCurrentContent }: AdminNavProps) {
+export default function AdminNav({ isSidebarOpen, setIsSidebarOpen,  }: AdminNavProps) {
   const router = useRouter();
   const sessionCookie = Cookies.get('session');
   const sesion = JSON.parse(sessionCookie || '{}');
@@ -24,7 +23,7 @@ export default function AdminNav({ isSidebarOpen, setIsSidebarOpen, handleCurren
 
   return (
     <>
-      <nav className='w-full bg-[#8B4513] shadow-lg p-5 flex justify-between fixed top-0 z-10 border-b-2 border-[#D2691E]'>
+      <nav className='w-full bg-[#8B4513] shadow-lg p-3 md:p-5 flex justify-between fixed top-0 z-10 border-b-2 border-[#D2691E]'>
         <div>
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -36,21 +35,33 @@ export default function AdminNav({ isSidebarOpen, setIsSidebarOpen, handleCurren
           </button>
         </div>
         <div>
-          <button onClick={() => handleCurrentContent()}>
-            <h1 className='font-bold text-white text-xl'>BARTTY</h1>
+          <button>
+            <h1 className='font-bold text-white text-lg md:text-xl'>BARTTY</h1>
           </button>
         </div>
         <div>
           <button 
             onClick={() => { Cookies.remove('session'); router.push('/'); }}
-            className="text-white hover:text-[#FF8C00] transition-colors font-medium"
+            className="text-white hover:text-[#FF8C00] transition-colors font-medium text-sm md:text-base"
           >
-            CERRAR SESIÓN
+            <span className="hidden md:inline">CERRAR SESIÓN</span>
+            <span className="md:hidden text-3xl">⚡</span>
           </button>
         </div>
       </nav>
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-20 w-64 md:w-80 bg-gradient-to-this.first = this.first.bind(this) from-[#8B4513] to-[#D2691E] transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out shadow-2xl pt-5`}>
+      <div
+        className={`
+          fixed top-16 left-0 
+          h-[calc(100vh-4rem)] 
+          w-72 md:w-80 
+          z-40
+          transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          transition-transform duration-300 ease-in-out
+          shadow-2xl
+        `}
+      >
+
         <div className="p-5 flex h-full">
           <div className="text-center max-w-md w-full">
             <div className="text-2xl md:text-3xl font-bold text-white mb-8 flex flex-col gap-5">
@@ -118,9 +129,10 @@ export default function AdminNav({ isSidebarOpen, setIsSidebarOpen, handleCurren
           </div>
         </div>
       </div>
+      {}
       {/* Overlay */}
       {isSidebarOpen && (
-        <div className="fixed inset-0 z-10 backdrop-blur-sm" style={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }} onClick={() => setIsSidebarOpen(false)}></div>
+        <div className="fixed inset-0 z-15 backdrop-blur-sm" style={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }} onClick={() => setIsSidebarOpen(false)}></div>
       )}
     </>
   );

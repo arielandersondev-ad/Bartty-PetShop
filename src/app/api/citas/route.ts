@@ -58,6 +58,8 @@ export async function GET (req: Request){
           nombre
         ),
         cliente:cliente_id(
+          ci,
+          telefono,
           nombre,
           apellido_paterno
         )

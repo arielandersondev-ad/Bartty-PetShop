@@ -115,7 +115,7 @@ export default function ClientesAdmin() {
 
   if (loading) {
     return (
-      <div className='text-black min-h-screen bg-[#FFF8E1] mt-10 flex items-center justify-center'>
+      <div className='text-black min-h-screen bg-[#FFF8E1] mt-10 flex items-center justify-center overflow-x-hidden'>
         <div className="text-lg">Cargando...</div>
       </div>
     );
@@ -123,14 +123,14 @@ export default function ClientesAdmin() {
 
   if (error) {
     return (
-      <div className='text-black min-h-screen bg-[#FFF8E1] mt-10 flex items-center justify-center'>
+      <div className='text-black min-h-screen bg-[#FFF8E1] mt-10 flex items-center justify-center overflow-x-hidden'>
         <div className="text-lg text-red-600">Error: {error}</div>
       </div>
     );
   }
 
   return (
-    <div className='text-black min-h-screen bg-[#FFF8E1] mt-10'>
+    <div className='text-black min-h-screen bg-[#FFF8E1] mt-10 overflow-x-hidden'>
       <div className='p-6'>
         <div className='mb-8'>
           <h1 className="text-3xl font-bold text-[#8B4513] mb-2">Gestión de Clientes</h1>
@@ -159,11 +159,28 @@ export default function ClientesAdmin() {
             )}
           </div>
           {modal === "nuevo" && (
-            <div className="fixed inset-100 z-50 flex items-center justify-center pt-20" >
-              <div className= "p-6 rounded-lg mx-4 max-h-[90vh] overflow-y-auto" >
-                  <ClientCard
-                    onCLienteCreado={async () => {}}
-                  />
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          
+          <div className="bg-[#fff8e1] 
+                          w-[90vw] 
+                          md:w-[34vw] 
+                          max-h-[90vh] 
+                          overflow-y-auto 
+                          rounded-xl 
+                          shadow-2xl 
+                          border-2 
+                          border-[#D2691E] 
+                          p-6 
+                          relative">
+                <button
+                  className="absolute top-3 right-3 bg-white border border-[#D2691E] px-3 py-1 rounded-lg hover:bg-[#FFD700]"
+                  onClick={() => setModal('')}
+                >
+                  ✕
+                </button>
+                <ClientCard
+                  onCLienteCreado={async () => {}}
+                />
               </div>
             </div>
           )}

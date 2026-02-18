@@ -17,12 +17,14 @@ export default function AdminDashboard() {
     }
   }, [sessionCookie, router]);
 
-  return <DashboardView />;
+  return (
+    <DashboardView />
+  );
 }
 
 function DashboardView() {
   return (
-    <div className='text-black min-h-screen bg-[#FFF8E1] p-6 mt-10'>
+    <div className='text-black overflow-x-hidden'>
       <div className='mb-8'>
         <h1 className="text-3xl font-bold text-[#8B4513] mb-2">Dashboard</h1>
         <p className="text-[#D2691E]">Resumen de la peluquería canina</p>

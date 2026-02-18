@@ -142,20 +142,27 @@ const validate = () => {
   return (
     <>
       {showConfirmModal && (
-        <div className="fixed inset-0  bg-gray-50/2 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 shadow-lg max-w-sm w-full mx-4">
-            <h2 className="text-lg font-bold text-[#8B4513] mb-4">Confirmar acción</h2>
-            <p className="text-gray-700 mb-6">¿Estás seguro de que deseas procesar este pago?</p>
-            <div className="flex gap-3 justify-end">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 shadow-2xl w-[90%] max-w-sm border border-[#D2691E]">
+            <h2 className="text-lg font-bold text-[#8B4513] mb-3">
+              Confirmar eliminación
+            </h2>
+
+            <p className="text-gray-600 mb-6 text-sm">
+              ¿Deseas eliminar este pago?
+            </p>
+
+            <div className="flex justify-end gap-3">
               <button
                 onClick={handleCancelModal}
-                className="px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-700"
+                className="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-100"
               >
                 Cancelar
               </button>
+
               <button
                 onClick={handleConfirmPago}
-                className="px-4 py-2 rounded-md bg-[#8B4513] text-white hover:bg-[#824124]"
+                className="px-4 py-2 text-sm rounded-lg bg-[#8B4513] text-white hover:bg-[#824124]"
               >
                 Confirmar
               </button>
@@ -163,101 +170,114 @@ const validate = () => {
           </div>
         </div>
       )}
-      <div className="bg-[#fff8e1] p-4">
-      <div className='flex flex-row gap-2 justify-center'>
-        <h3 className="text-lg font-semibold text-[#8B4513] mb-3">Falta {saldo-totalPagado}</h3>
 
-        <div className="mt-1 text-sm text-gray-700">
-          <div>pago: <span className="font-medium">{totalPagado}</span></div>
+      <div className="bg-[#fff8e1] space-y-5">
+        <div className="flex justify-between items-center bg-white border border-[#D2691E] rounded-lg px-4 py-3 shadow-sm">
+          <div>
+            <p className="text-xs text-gray-500">Saldo restante</p>
+            <p className="text-lg font-bold text-[#8B4513]">
+              Bs {(saldo - totalPagado).toFixed(2)}
+            </p>
+          </div>
+
+          <div className="text-right">
+            <p className="text-xs text-gray-500">Pagado</p>
+            <p className="font-medium text-gray-700">
+              Bs {totalPagado.toFixed(2)}
+            </p>
+          </div>
         </div>
-      </div>
-      <div>
-      <div className="mb-4">
-        {pagos.length === 0 ? (
-          <div>No hay pagos</div>
-        ) : (
-          <ul className="flex flex-wrap space-y-2 gap-2">
-            {pagos.map(p => (
-              <li key={p.id} className="m-0 flex w-auto justify-between items-center border p-2 rounded hover:bg-gray-200 cursor-pointer"
-                onClick={() => handlePagoSelected(p.id)}
+
+
+        <div>
+          <div className="my-2">
+            {pagos.length === 0 ? (
+              <div>No hay pagos</div>
+            ) : (
+              <ul className="flex flex-wrap gap-2">
+                {pagos.map(p => (
+                  <li
+                    key={p.id}
+                    onClick={() => handlePagoSelected(p.id)}
+                    className="cursor-pointer px-3 py-2 bg-white border border-[#D2691E] rounded-lg shadow-sm hover:bg-[#FFF3CD] transition-all"
+                  >
+                    <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+                      {p.tipo_pago}
+                    </div>
+                    <div className="text-sm font-semibold text-[#8B4513]">
+                      Bs {p.monto.toFixed(2)}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+            )}
+          </div>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4"> 
+            <div>
+              <label className="block text-sm font-medium text-black">Tipo de pago</label>
+              <select
+                value={tipoPago}
+                onChange={(e) => setTipoPago(e.target.value as TipoPago)}
+                className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D2691E] focus:border-[#D2691E]"
               >
-                <div>
-                  <div className="text-xs text-center text-gray-500">{p.tipo_pago}</div>
-                  <div className="font-medium">{p.monto.toFixed(1)} Bs</div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      </div>
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <div className="flex flex-wrap flex-row justify-evenly  gap-4"> 
-          <div>
-            <label className="block text-sm font-medium text-black">Tipo de pago</label>
-            <select
-              value={tipoPago}
-              onChange={(e) => setTipoPago(e.target.value as TipoPago)}
-              className="mt-1 block w-auto px-3 py-2 border border-gray-300 rounded-md"
+                <option value="qr">QR</option>
+                <option value="efectivo">Efectivo</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-black">Pago como</label>
+              <select
+                value={tipoPagoCita}
+                onChange={(e) => setTipoPagoCita(e.target.value as TipoPagoCita)}
+                className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D2691E] focus:border-[#D2691E]" 
+              >
+                <option value="adelanto">Adelanto</option>
+                <option value="total">Total</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-black">Monto</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={monto}
+                onChange={(e) => setMonto(e.target.value)}
+                className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D2691E] focus:border-[#D2691E]"
+                placeholder="0.00"
+              />
+            </div>
+          </div>
+
+          {error && <p className="text-red-600 text-sm">{error}</p>}
+          {success && <p className="text-green-600 text-sm">{success}</p>}
+
+          <div className="flex gap-2 justify-between mt-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full py-2 rounded-lg text-sm font-medium transition-all ${
+                loading
+                  ? 'bg-gray-400'
+                  : 'bg-[#8B4513] hover:bg-[#824124]'
+              } text-white`}
             >
-              <option value="qr">QR</option>
-              <option value="efectivo">Efectivo</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-black">Tipo de pago en la cita</label>
-            <select
-              value={tipoPagoCita}
-              onChange={(e) => setTipoPagoCita(e.target.value as TipoPagoCita)}
-              className="mt-1 block w-auto px-3 py-2 border border-gray-300 rounded-md"
+              {loading ? 'Guardando...' : 'Registrar Pago'}
+            </button>
+            <button
+              type="button"
+              className="w-full py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-100"
             >
-              <option value="adelanto">Adelanto</option>
-              <option value="total">Total</option>
-            </select>
+              Limpiar
+            </button>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-black">Monto</label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={monto}
-              onChange={(e) => setMonto(e.target.value)}
-              className="mt-1 block w-1/2 px-3 py-2 border border-gray-300 rounded-md"
-              placeholder="0.00"
-            />
-          </div>
-        </div>
-
-        {error && <p className="text-red-600 text-sm">{error}</p>}
-        {success && <p className="text-green-600 text-sm">{success}</p>}
-
-        <div className="flex gap-2 justify-between">
-          <button
-            type="button"
-            onClick={() => {
-              setMonto('');
-              setTipoPago('qr');
-              setTipoPagoCita('adelanto');
-              setError(null);
-              setSuccess(null);
-            }}
-            className="px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-200"
-          >
-            Limpiar
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className={`px-4 py-2 rounded-md text-white ${loading ? 'bg-gray-400' : 'bg-[#8B4513] hover:bg-[#824124]'}`}
-          >
-            {loading ? 'Guardando...' : 'Registrar Pago'}
-          </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
     </>
   );
 }

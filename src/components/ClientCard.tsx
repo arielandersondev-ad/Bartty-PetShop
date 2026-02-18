@@ -48,7 +48,7 @@ export default function ClientCard({ onCLienteCreado }: ClientForm) {
     setLoading(false);
   }
   return (
-    <div className=" p-6 rounded-lg shadow-md bg-[#fff8e1] border-2 border-[#d2691e]" >
+    <div className=" p-2 bg-[#fff8e1]" >
       <h2 className="text-xl font-semibold text-black  mb-4">Datos del Cliente</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className='flex flex-col md:flex-row gap-2'>

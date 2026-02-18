@@ -14,12 +14,6 @@ export type ReportDetail = {
   saldo: number
   tipo_pago: string
 }
-export type ReportEmpServDetail = {
-  fecha_servicio: string
-  servicio: string
-  monto_servicio: number
-}
-
 
 export interface ReportSummary {
   total_ingresos: number;
@@ -28,19 +22,8 @@ export interface ReportSummary {
   pago_maximo: number;
   pago_minimo: number;
 }
-export interface ReportEmpServSummary {
-  total_ingresos: number;
-  total_servicios: number;
-  promedio: number;
-  servicio_mas_caro: number;
-  servicio_mas_barato: number;
-}
 
 export interface ReportData {
   resumen: ReportSummary;
   detalles: ReportDetail[];
-}
-export interface ReportDataEmpServ {
-  resumen: ReportEmpServSummary;
-  detalles: ReportEmpServDetail[];
 }
