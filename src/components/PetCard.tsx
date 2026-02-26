@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
-import NuevaCita from './citas/NuevaCita';
 interface PetForm {
   cliente_id: string;
   disabled?: boolean;
   onMascotaCreada?: React.Dispatch<React.SetStateAction<boolean>>
 }
 export default function PetCard ({cliente_id, onMascotaCreada,disabled}: PetForm) {
-  const [abrirCita, setAbrirCita] = useState(false)
-  const [mascotas, setMascotas] = useState([])
   const [form ,setForm] = useState({
     nombre:'',
     raza:'',
@@ -48,9 +45,7 @@ export default function PetCard ({cliente_id, onMascotaCreada,disabled}: PetForm
       }
       
       const data = await res.json()
-      setMascotas(data)
       onMascotaCreada?.(prev => !prev)
-      setAbrirCita(true)
       console.log('datos registrados de la mascota: ',data)
     } catch (error) {
       console.error('Error en handleSubmit:', error)
@@ -59,184 +54,203 @@ export default function PetCard ({cliente_id, onMascotaCreada,disabled}: PetForm
   }
 
   return (
-    <div className= "p-6 rounded-lg shadow-md bg-[#fff8e1] border-2 border-[#d2691e]">
+    <div>
       <h2 className="text-xl font-semibold text-black mb-4">Datos de la Mascota</h2>
       <fieldset disabled={disabled} className={disabled ? 'opacity-50 pointer-events-none' : ''}>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className='flex flex-col md:flex-row gap-2'>
+        <form onSubmit={handleSubmit} className="space-y-6">
+
+          {/* Datos básicos */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-black">
+            
             <div>
-              <label className="block text-sm font-medium text-black">Nombre de la Mascota</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Nombre de la Mascota
+              </label>
               <input
                 type="text"
-                id="nombre"
                 name="nombre"
                 value={form.nombre}
                 onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 bg-amber-500 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="text-black mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition"
                 required
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-black">Raza</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Raza
+              </label>
               <input
                 type="text"
-                id="raza"
                 name="raza"
                 value={form.raza}
                 onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 bg-amber-500 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition"
               />
             </div>
-          </div>
-          <div className='flex flex-col md:flex-row gap-2'>
+
             <div>
-              <label className="block text-sm font-medium text-black">color</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Color
+              </label>
               <input
                 type="text"
-                id="color"
                 name="color"
                 value={form.color}
                 onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 bg-amber-500 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-black">Edad (años)</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Edad (años)
+              </label>
               <input
                 type="number"
-                id="edad"
                 name="edad"
+                min="0"
                 value={form.edad}
                 onChange={handleChange}
-                min="0"
-                className="mt-1 block w-full px-3 py-2 bg-amber-500 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition"
               />
             </div>
+
           </div>
-          <div>
-            <label className="block text-sm font-medium text-black">tamano</label>
-            <div className="flex -flex-col md:flex-row mt-1 space-y-2 text-amber-600 font-bold">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="tamano"
-                  value="pequeño"
-                  onChange={handleChange}
-                  className="mr-2"
-                />
-                Pequeño
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="tamano"
-                  value="mediano"
-                  onChange={handleChange}
-                  className="mr-2"
-                />
-                Mediano
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="tamano"
-                  value="grande"
-                  onChange={handleChange}
-                  className="mr-2"
-                />
-                Grande
-              </label>
+
+          {/* Tamaño */}
+          <div className='text-black'>
+            <label className="block text-sm font-semibold text-gray-800 mb-2">
+              Tamaño
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {["pequeño", "mediano", "grande"].map((size) => (
+                <label
+                  key={size}
+                  className={`cursor-pointer rounded-lg border p-3 text-center transition
+                  ${form.tamano === size
+                      ? "border-amber-500 bg-amber-50"
+                      : "border-gray-300 hover:border-amber-400"}`}
+                >
+                  <input
+                    type="radio"
+                    name="tamano"
+                    value={size}
+                    checked={form.tamano === size}
+                    onChange={handleChange}
+                    className="hidden"
+                  />
+                  <span className="capitalize">{size}</span>
+                </label>
+              ))}
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-black">Cuenta con Vacuna Antirabica?</label>
-            <div className="flex flex-col md:flex-row gap-3 mt-1 space-y-2 text-amber-600 font-bold">
-              <label className="flex items-center">
+
+          {/* Vacuna */}
+          <div className='text-black'>
+            <label className="block text-sm font-semibold text-gray-800 mb-2">
+              ¿Vacuna Antirrábica?
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <label
+                className={`cursor-pointer rounded-lg border p-3 text-center transition
+                ${form.vacuna_antirrabica === true
+                    ? "border-amber-500 bg-amber-50"
+                    : "border-gray-300 hover:border-amber-400"}`}
+              >
                 <input
                   type="radio"
                   name="vacuna_antirrabica"
-                  value='si'
-                  onChange={handleChange}
-                  className="mr-2"
+                  checked={form.vacuna_antirrabica === true}
+                  onChange={() =>
+                    setForm({ ...form, vacuna_antirrabica: true })
+                  }
+                  className="hidden"
                 />
-                SI
+                Sí
               </label>
-              <label className="flex items-center">
+
+              <label
+                className={`cursor-pointer rounded-lg border p-3 text-center transition
+                ${form.vacuna_antirrabica === false
+                    ? "border-amber-500 bg-amber-50"
+                    : "border-gray-300 hover:border-amber-400"}`}
+              >
                 <input
                   type="radio"
                   name="vacuna_antirrabica"
-                  value='no'
-                  onChange={handleChange}
-                  className="mr-2"
+                  checked={form.vacuna_antirrabica === false}
+                  onChange={() =>
+                    setForm({ ...form, vacuna_antirrabica: false })
+                  }
+                  className="hidden"
                 />
-                NO
+                No
               </label>
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-black">Sexo</label>
-            <div className="flex flex-col md:flex-row gap-3 mt-1 space-y-2 text-amber-600 font-bold">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="sexo"
-                  value="H"
-                  onChange={handleChange}
-                  className="mr-2"
-                />
-                Hembra
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="sexo"
-                  value="M"
-                  onChange={handleChange}
-                  className="mr-2"
-                />
-                Macho
-              </label>
+
+          {/* Sexo */}
+          <div className='text-black'>
+            <label className="block text-sm font-semibold text-gray-800 mb-2">
+              Sexo
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: "Hembra", value: "H" },
+                { label: "Macho", value: "M" },
+              ].map((option) => (
+                <label
+                  key={option.value}
+                  className={`cursor-pointer rounded-lg border p-3 text-center transition
+                  ${form.sexo === option.value
+                      ? "border-amber-500 bg-amber-50"
+                      : "border-gray-300 hover:border-amber-400"}`}
+                >
+                  <input
+                    type="radio"
+                    name="sexo"
+                    value={option.value}
+                    checked={form.sexo === option.value}
+                    onChange={handleChange}
+                    className="hidden"
+                  />
+                  {option.label}
+                </label>
+              ))}
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-black">Notas Especiales</label>
+
+          {/* Observaciones */}
+          <div className='text-black'>
+            <label className="block text-sm font-semibold text-gray-800 mb-2">
+              Notas Especiales
+            </label>
             <textarea
-              id="observaciones"
               name="observaciones"
-              rows={2}
+              rows={3}
               value={form.observaciones}
               onChange={handleChange}
-              className="mt-1 block w-full px-3 py-2 bg-amber-500 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition resize-none"
               placeholder="Comportamiento, alergias, etc."
             />
           </div>
-          {cliente_id?.length != 0 && (
+
+          {/* Botón */}
+          {cliente_id?.length !== 0 && (
             <button
+              type="submit"
               disabled={loading}
-              className="w-full bg-amber-600 text-white py-2 px-4 rounded-md hover:bg-amber-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full rounded-lg bg-amber-600 py-3 font-semibold text-white shadow-md transition hover:bg-amber-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              Registro de mascota
+              {loading ? "Registrando..." : "Registrar Mascota"}
             </button>
           )}
-        </form>
-      </fieldset>
-      {abrirCita && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          {/* Overlay */}
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setAbrirCita(false)}
-          />
 
-          {/* Modal */}
-          <div className="relative z-10">
-            <NuevaCita
-              clienteId={cliente_id}
-              mascotas={mascotas}
-            />
-          </div>
-        </div>
-      )}
+        </form>
+
+      </fieldset>
+
     </div>
   );
 };

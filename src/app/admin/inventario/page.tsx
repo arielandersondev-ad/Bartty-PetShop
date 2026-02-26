@@ -118,12 +118,12 @@ export default function InventarioAdmin() {
     {
       label: 'Editar',
       onClick: handleEdit,
-      variant: 'primary',
+      variant: 'amarillo',
     },
     {
       label: 'Eliminar',
       onClick: handleDelete,
-      variant: 'danger',
+      variant: 'rojo',
     },
   ];
 

@@ -1,0 +1,201 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+//////////////////////////////////////////////////
+// ENUMS
+//////////////////////////////////////////////////
+
+enum EstadoCita {
+  pendiente
+  confirmado
+  cancelado
+  concluido
+  atendido
+}
+
+enum TipoMovimiento {
+  ENTRADA
+  SALIDA
+}
+
+enum TipoPago {
+  qr
+  efectivo
+}
+
+enum TipoPagoCita {
+  adelanto
+  total
+}
+
+enum RolUsuario {
+  admin
+  emp_servicio
+  emp_recepcion
+}
+
+//////////////////////////////////////////////////
+// MODELOS
+//////////////////////////////////////////////////
+
+model Categoria {
+  id        String    @id @default(uuid())
+  nombre    String    @unique
+  estado    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  productos Producto[]
+}
+
+model Cliente {
+  id              String     @id @default(uuid())
+  ci              String     @unique
+  nombre          String
+  apellidoPaterno String
+  apellidoMaterno String?
+  email           String?
+  telefono        String
+  numeroReferido  String?
+  createdAt       DateTime   @default(now())
+
+  mascotas Mascota[]
+  citas    Cita[]
+}
+
+model Mascota {
+  id               String   @id @default(uuid())
+  clienteId        String
+  nombre           String
+  raza             String?
+  fechaNacimiento  DateTime?
+  edad             Int?
+  color            String?
+  tamano           String?
+  vacunaAntirrabica String?
+  sexo             String?
+  observaciones    String?
+  createdAt        DateTime @default(now())
+
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  citas   Cita[]
+}
+
+model Cita {
+  id           String       @id @default(uuid())
+  clienteId    String
+  mascotaId    String
+  fecha        DateTime
+  horaInicio   DateTime?
+  horaFin      DateTime?
+  estado       EstadoCita
+  observaciones String?
+  estiloCorte  String?
+  createdAt    DateTime     @default(now())
+
+  cliente  Cliente @relation(fields: [clienteId], references: [id])
+  mascota  Mascota @relation(fields: [mascotaId], references: [id])
+  pagos    Pago[]
+  servicios ServicioCita[]
+}
+
+model Pago {
+  id           String        @id @default(uuid())
+  citaId       String
+  monto        Decimal
+  tipoPago     TipoPago
+  tipoPagoCita TipoPagoCita
+  createdAt    DateTime      @default(now())
+
+  cita Cita @relation(fields: [citaId], references: [id], onDelete: Cascade)
+}
+
+model Producto {
+  id              String   @id @default(uuid())
+  nombre          String
+  tipo            String?
+  categoriaId     String
+  unidadMedidaId  String
+  precioCompra    Decimal
+  precioVenta     Decimal
+  descripcion     String?
+  stockMinimo     Int      @default(0)
+  estado          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  categoria      Categoria      @relation(fields: [categoriaId], references: [id])
+  unidadMedida   UnidadMedida   @relation(fields: [unidadMedidaId], references: [id])
+  inventario     Inventario?
+  movimientos    MovimientoInventario[]
+}
+
+model Inventario {
+  productoId String   @id
+  cantidad   Int      @default(0)
+  updatedAt  DateTime @updatedAt
+
+  producto Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+}
+
+model MovimientoInventario {
+  id         String         @id @default(uuid())
+  productoId String
+  tipo       TipoMovimiento
+  cantidad   Int
+  referencia String?
+  createdAt  DateTime       @default(now())
+
+  producto Producto @relation(fields: [productoId], references: [id])
+}
+
+model UnidadMedida {
+  id        String   @id @default(uuid())
+  nombre    String
+  unidad    String
+  valor     Decimal
+  estado    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productos Producto[]
+}
+
+model Usuario {
+  id             String      @id @default(uuid())
+  nombre         String
+  email          String      @unique
+  password       String
+  rol            RolUsuario
+  activo         Boolean     @default(true)
+  createdAt      DateTime    @default(now())
+  ci             String?
+  telefono       String?
+  numeroReferido String?
+  apellido       String?
+
+  servicios ServicioCita[]
+}
+
+model ServicioCita {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  servicio  String?
+  valor     BigInt?
+  usuarioId String?
+  citaId    String?
+
+  usuario Usuario? @relation(fields: [usuarioId], references: [id])
+  cita    Cita?    @relation(fields: [citaId], references: [id])
+}

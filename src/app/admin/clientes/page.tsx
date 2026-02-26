@@ -3,16 +3,13 @@ import { useState, useEffect } from 'react';
 import { DynamicTable, ColumnConfig, ActionButton } from '../components/DynamicTable';
 import { customStyles } from '@/styles/colors';
 import { Cliente } from '@/types';
-import { apiService } from '@/lib/api';
-import ClientCard from '@/components/ClientCard';
-import EditClient from './EditClient';
+import DetailClient from './DetailClient';
 
 export default function ClientesAdmin() {
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [modal, setModal]  = useState("");
-  const [cliente, setCliente] = useState<Cliente | undefined>();
+  const [ clientes, setClientes ] = useState<Cliente[]>([]);
+  const [ loading, setLoading ] = useState(true);
+  const [ error, setError ] = useState<string | null>(null);
+  const [ clienteID, setClienteId ] = useState<string>('')
 
   useEffect(() => {
     fetchClientes();
@@ -33,21 +30,12 @@ export default function ClientesAdmin() {
     }
   };
 
-  const handleEdit = (cliente: Cliente) => {
-    setCliente(cliente);
-    setModal("editClient");
-  };
-
-  const handleDelete = async (cliente: Cliente) => {
-    if (!cliente.id) return;
-    
-    try {
-      await apiService.deleteCliente(cliente.id);
-      await fetchClientes();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Error al eliminar cliente');
-    }
-  };
+  const handleDetallesCliente = (cliente: Cliente) => {
+    if (!cliente.id) return
+    setClienteId(cliente.id)
+    console.log(cliente.id)
+    console.log('el estado anterior es: ',clienteID)
+  }
 
   const columns: ColumnConfig<Cliente>[] = [
     {
@@ -101,15 +89,11 @@ export default function ClientesAdmin() {
   ];
 
   const actions: ActionButton<Cliente>[] = [
+
     {
-      label: 'Editar',
-      onClick: handleEdit,
-      variant: 'azul',
-    },
-    {
-      label: 'Eliminar',
-      onClick: handleDelete,
-      variant: 'rojo',
+      label: 'Detalles',
+      onClick: handleDetallesCliente,
+      variant: 'amarillo',
     },
   ];
 
@@ -140,70 +124,29 @@ export default function ClientesAdmin() {
         <div className={`${customStyles.card.base} ${customStyles.card.hover} rounded-lg p-6 mb-6`}>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
             <h2 className="text-xl font-semibold text-[#8B4513] mb-4 md:mb-0">Lista de Clientes</h2>
-
-            {modal === 'nuevo' && (
-              <button
-                onClick={() => setModal("")}
-                className={`${customStyles.button.primary} px-6 py-2 rounded-lg font-medium transition-colors`}
-              >
-                Cancelar
-              </button>
-            )}
-            {modal=== '' &&(
-              <button
-                onClick={() => setModal("nuevo")}
-                className={`${customStyles.button.primary} px-6 py-2 rounded-lg font-medium transition-colors`}
-              >
-                Agregar Cliente
-              </button>
-            )}
           </div>
-          {modal === "nuevo" && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          
-          <div className="bg-[#fff8e1] 
-                          w-[90vw] 
-                          md:w-[34vw] 
-                          max-h-[90vh] 
-                          overflow-y-auto 
-                          rounded-xl 
-                          shadow-2xl 
-                          border-2 
-                          border-[#D2691E] 
-                          p-6 
-                          relative">
-                <button
-                  className="absolute top-3 right-3 bg-white border border-[#D2691E] px-3 py-1 rounded-lg hover:bg-[#FFD700]"
-                  onClick={() => setModal('')}
-                >
-                  ✕
-                </button>
-                <ClientCard
-                  onCLienteCreado={async () => {}}
+          <div className='grid grid-cols-1 md:grid-cols-4 gap-4 '>
+            {(clienteID !== '') && (
+              <div className=''>
+                <DetailClient
+                  id_cliente={clienteID}
+                  onSuccess={fetchClientes}
                 />
               </div>
+            )}
+            <div className='col-span-3'>
+              <DynamicTable
+                data={clientes}
+                columns={columns}
+                actions={actions}
+                pageSize={10}
+                showSearch={true}
+                showPagination={true}
+                emptyMessage="No hay clientes registrados"
+                className="w-full"
+              />
             </div>
-          )}
-          {modal === "editClient" && (
-            <div className="fixed inset-100 z-50 flex items-center justify-center pt-20" >
-              <div className= " flex flex-col p-6 rounded-lg mx-4 max-h-[90vh] overflow-y-auto bg-[#fff8e100]" >
-                <EditClient
-                  cliente={cliente}
-                />
-                <button onClick={() => setModal('')} className=" bg-red-500 text-white p-2 rounded-md">Cerrar</button>
-              </div>
-            </div>
-          )}
-          <DynamicTable
-            data={clientes}
-            columns={columns}
-            actions={actions}
-            pageSize={10}
-            showSearch={true}
-            showPagination={true}
-            emptyMessage="No hay clientes registrados"
-            className="w-full"
-          />
+          </div>
         </div>
       </div>
     </div>

@@ -48,9 +48,9 @@ export default function ClientCard({ onCLienteCreado }: ClientForm) {
     setLoading(false);
   }
   return (
-    <div className=" p-2 bg-[#fff8e1]" >
+    <div className=" p-2 bg-[#fff8e1] border-2 border-[#d2691e] rounded-2xl" >
       <h2 className="text-xl font-semibold text-black  mb-4">Datos del Cliente</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 text-black">
         <div className='flex flex-col md:flex-row gap-2'>
           <div>
             <label className="block text-sm font-medium text-black ">CI</label>
@@ -60,7 +60,7 @@ export default function ClientCard({ onCLienteCreado }: ClientForm) {
               name="ci"
               value={form.ci}
               onChange={handleChange}
-              className="mt-1 block w-full px-3 py-2 bg-amber-500 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-3 py-2 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition border border-gray-300 rounded-md shadow-sm focus:outline-none bg-white"
               required
             />
           </div>
@@ -72,7 +72,7 @@ export default function ClientCard({ onCLienteCreado }: ClientForm) {
               name="nombre"
               value={form.nombre}
               onChange={handleChange}
-              className="mt-1 block w-full px-3 py-2 bg-amber-500 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-3 py-2 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition border border-gray-300 rounded-md shadow-sm focus:outline-none bg-white"
               required
             />
           </div>
@@ -86,7 +86,7 @@ export default function ClientCard({ onCLienteCreado }: ClientForm) {
               name="apellido_paterno"
               value={form.apellido_paterno}
               onChange={handleChange}
-              className="mt-1 block w-full px-3 py-2 bg-amber-500 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-3 py-2 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition border border-gray-300 rounded-md shadow-sm focus:outline-none bg-white"
               required
             />
           </div>
@@ -98,7 +98,7 @@ export default function ClientCard({ onCLienteCreado }: ClientForm) {
               name="apellido_materno"
               value={form.apellido_materno}
               onChange={handleChange}
-              className="mt-1 block w-full px-3 py-2 bg-amber-500 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-3 py-2 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition border border-gray-300 rounded-md shadow-sm focus:outline-none bg-white"
               required
             />
           </div>
@@ -111,7 +111,7 @@ export default function ClientCard({ onCLienteCreado }: ClientForm) {
             name="email"
               value={form.email}
               onChange={handleChange}
-            className="mt-1 block w-full px-3 py-2 bg-amber-500 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 block w-full px-3 py-2 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition border border-gray-300 rounded-md shadow-sm focus:outline-none bg-white"
             required
           />
         </div>
@@ -124,7 +124,7 @@ export default function ClientCard({ onCLienteCreado }: ClientForm) {
               name="telefono"
               value={form.telefono}
               onChange={handleChange}
-              className="mt-1 block w-full px-3 py-2 bg-amber-500 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-3 py-2 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition border border-gray-300 rounded-md shadow-sm focus:outline-none bg-white"
               required
             />
           </div>
@@ -136,7 +136,7 @@ export default function ClientCard({ onCLienteCreado }: ClientForm) {
               name="numero_referido"
               value={form.numero_referido}
               onChange={handleChange}
-              className="mt-1 block w-full px-3 py-2 bg-amber-500 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-3 py-2 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none transition border border-gray-300 rounded-md shadow-sm focus:outline-none bg-white"
             />
           </div>
         </div>

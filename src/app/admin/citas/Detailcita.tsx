@@ -19,7 +19,6 @@ export default function Detailcita({ citaDetail, onRefresh }: { citaDetail: Cita
     })
   }
 
-
   async function updateCita(params: Cita) {
     try {
       await fetch('/api/citas', {
@@ -123,7 +122,7 @@ export default function Detailcita({ citaDetail, onRefresh }: { citaDetail: Cita
                 <option value="atendido">Atendido</option>
               )}
               {(rol === 'admin' || rol === 'emp_recepcion') && (
-                <option value="cancelado">Cancelado</option>
+                <option value="cancelado" className='bg-red-500 text-white'>Cancelado</option>
               )}
               {(rol === 'admin' || rol === 'emp_recepcion') && (
                 <option value="concluido">Concluido</option>
@@ -231,20 +230,7 @@ export default function Detailcita({ citaDetail, onRefresh }: { citaDetail: Cita
         <div className='flex flex-row md:flex-col gap-2'>
           <div>
             <WhatsAppButton
-              phone='59170173088'
-              message={`Hola ${citaDetail.cliente.nombre}
-              
-              Tu cita está confirmada.
-              
-              - Fecha: ${citaDetail.fecha}
-              - Mascota: ${citaDetail.mascota.nombre}
-              - Total: Bs 10
-              `}
-            />
-          </div>
-          <div>
-            <WhatsAppButton
-              phone='59170173088'
+              phone={`591${citaDetail.cliente.telefono}`}
               message={`Hola ${citaDetail.cliente.nombre}
               
               Tu cita está confirmada.

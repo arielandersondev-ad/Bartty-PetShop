@@ -1,4 +1,4 @@
-'useClient';
+'use client';
 import { useState } from "react"
 
 type Mascota = {
@@ -15,48 +15,108 @@ interface MascotaCardProps {
   mascotas: Mascota[]
   onMascotaCreaada: React.Dispatch<React.SetStateAction<boolean>>
 }
-export default function PetList({mascotas, onMascotaCreaada} : MascotaCardProps) {
-  const [confirm, setConfirm] = useState<string>()
 
+export default function PetList({ mascotas, onMascotaCreaada }: MascotaCardProps) {
+  const [confirm, setConfirm] = useState<string | null>(null)
+  const [ verMascotas, setMascotas] = useState(true)
   const handleDelete = async (id: string) => {
-    const res = await fetch(`./api/mascotas?id=${id}`,{method:'DELETE'})
-    if (!res.ok) {return console.log('Error en la eliminacion de la mascota')}
-    setConfirm('')//observacion
+    const res = await fetch(`./api/mascotas?id=${id}`, { method: 'DELETE' })
+    if (!res.ok) return console.log('Error en la eliminación de la mascota')
+
+    setConfirm(null)
     onMascotaCreaada(prev => !prev)
   }
-
-  if (!mascotas || mascotas.length === 0) {
-    return (
-      <p className="text-center text-gray-500">
-        No hay mascotas registradas
-      </p>
-    )
+  function ViewMascotas(value:boolean){
+    setMascotas(!value)
   }
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {mascotas.map((mascota) => (
-        <div
-          key={mascota.id}
-          className="flex flex-col bg-[#ffffff] border border-[#d2691e] p-5 rounded-lg shadow-md items-center gap-2"
-          onClick={() => setConfirm('')}
-        >
-          <div className="font-extrabold w-full text-center text-lg">
-            {mascota.nombre || 'Sin nombre'}
-          </div>
 
-          <div className="w-full text-sm space-y-1">
-            <p><strong>Raza:</strong> {mascota.raza || 'No especificada'}</p>
-            <p><strong>Edad:</strong> {mascota.edad ?? 'No registrada'}</p>
-            <p><strong>Tamaño:</strong> {mascota.tamano || 'No especificado'}</p>
-            <p><strong>Sexo:</strong> {mascota.sexo || 'No especificado'}</p>
-          </div>
-          {confirm === mascota.id ?
-            <button onClick={ () => handleDelete(mascota.id)} className="mb-4 hover:bg-[#ffb282] font-extrabold text-xl bg-[#fff8e1] border-2 border-[#d2691e] rounded-2xl p-2 pl-3 pr-3 ">🪣Confirmar</button>
-          :
-            <button onClick={ (e) => {setConfirm(mascota.id); e.stopPropagation()}} className="mb-4 hover:bg-[#ffb282] font-extrabold text-xl bg-[#fff8e1] border-2 border-[#d2691e] rounded-2xl p-2 pl-3 pr-3 ">♦️Eliminar</button>
-          }
+  return (
+    <div className="flex flex-col gap-6">
+      
+      {/* Header */}
+      <div 
+        className="bg-gray-100 border border-gray-200 rounded-xl p-6 hover:bg-gray-200"
+        onClick={() => ViewMascotas(verMascotas)}
+      >
+        <h2 className="text-xl font-semibold text-gray-800 ">
+          {verMascotas ? 'Ver Mascotas':'Ocultar Mascotas'}
+        </h2>
+      </div>
+
+      {/* Grid */}
+      {verMascotas && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {mascotas.map((mascota) => (
+            <div
+              key={mascota.id}
+              className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all"
+            >
+              {/* Nombre */}
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {mascota.nombre || 'Sin nombre'}
+                </h3>
+              </div>
+
+              {/* Info */}
+              <div className="grid grid-cols-2 gap-4 text-sm mb-6">
+                <div>
+                  <p className="text-gray-500">Raza</p>
+                  <p className="font-medium text-gray-800">
+                    {mascota.raza || 'No especificada'}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-gray-500">Edad</p>
+                  <p className="font-medium text-gray-800">
+                    {mascota.edad ?? 'No registrada'}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-gray-500">Tamaño</p>
+                  <p className="font-medium text-gray-800">
+                    {mascota.tamano || 'No especificado'}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-gray-500">Sexo</p>
+                  <p className="font-medium text-gray-800">
+                    {mascota.sexo || 'No especificado'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Acción */}
+              {confirm === mascota.id ? (
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => handleDelete(mascota.id)}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white text-sm font-medium py-2 rounded-md transition"
+                  >
+                    Confirmar eliminación
+                  </button>
+                  <button
+                    onClick={() => setConfirm(null)}
+                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium py-2 rounded-md transition"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setConfirm(mascota.id)}
+                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium py-2 rounded-md transition"
+                >
+                  Eliminar
+                </button>
+              )}
+            </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   )
 }

@@ -27,16 +27,26 @@ export default function Agenda() {
   });
   const [mascotas, setMascotas] = useState([])
 
-  
-  useEffect(() => {
-    /*const sessionCookie = Cookies.get('session');
-    if (!sessionCookie) return;
-    const session = JSON.parse(sessionCookie);
-    if (session.type !== 'cliente') {
-      router.push('/');
-      return;
-    }*/
+  async function fetchCitasIdCliente(id: string){
+    try {
+      const res = await fetch(`/api/citas?action=allbyCID&id=${id}`)
+      if (!res.ok) {console.log('error de fetch de citas por cliente')}
+      const data = await res.json()
+      if (res.ok){setCitas(data)}
+    } catch (error) {
+      console.error("error en el fetch try", error)
+    }
+  }
+  async function getClientePet(id: string){
+    const res = await fetch(`/api/mascotas?action=clientPets&id=${id}`)
+    if (!res.ok){console.log('no se obtubieron los datos de la mascota'); return}
+    const data = await res.json()
+    console.log('data de front: ',data)
+    setMascotas(data)
+    setModal('')
+  }
 
+  useEffect(() => {
     const sessionCookie = Cookies.get('session');
     if (!sessionCookie) return;
     let session;
@@ -61,91 +71,134 @@ export default function Agenda() {
     }
     getClienteId(session.ci);
   }, [router]);
-  useEffect(() => {
-    if (!cliente.id) return
-    const fetchCitasIdCliente = async (id: string) => {
-      try {
-        const res = await fetch(`/api/citas?action=allbyCID&id=${id}`)
-        if (!res.ok) {console.log('error de fetch de citas por cliente')}
-        const data = await res.json()
-        setCitas(data)
-      } catch (error) {
-        console.error("error en el fetch try", error)
-      }
-    }
-    fetchCitasIdCliente(cliente.id)
 
+  useEffect(() => {
+    if (!cliente.id)return
+    const loadCitas = async ()=> await fetchCitasIdCliente(cliente.id)
+    loadCitas()
   }, [cliente.id])
   
   useEffect(() => {
     if (!cliente.id) return
-    const getClientePet = async (id: string) => {
-      const res = await fetch(`/api/mascotas?action=clientPets&id=${id}`)
-      if (!res.ok){console.log('no se obtubieron los datos de la mascota'); return}
-      const data = await res.json()
-      console.log('data de front: ',data)
-      setMascotas(data)
-      setModal('')
-    }
-    getClientePet(cliente.id)
-  }, [cliente?.id])
+    const loadPets = async () => await getClientePet(cliente.id)
+    loadPets()
+  }, [cliente.id,mascotaCreada])
 
 
   return (
-    <div className="flex flex-col md:flex-row gap-10 h-full md:h-auto bg-[#FFF8E1] m-5 pt-20 md:p-0 md:m-30">
-      {/**MODALES */}
+    <div className="min-h-screen bg-[#FFF8E1] p-6 md:p-10 mt-20">
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
+        <div className='grid grid-cols-1 gap-8 text-black '>
+          {/* Datos del cliente */}
+          <div className="bg-white border border-[#d2691e]/40 p-6 rounded-2xl shadow-lg space-y-4">
+            
+            <h2 className="text-xl font-bold text-[#8B4513]">
+              👋 Bienvenid@ {cliente.nombre}
+            </h2>
+
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-500">Email</span>
+                <span>{cliente.email}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-500">Teléfono</span>
+                <span>{cliente.telefono}</span>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <button 
+                className="flex-1 bg-green-600 hover:bg-green-900 transition text-white font-medium rounded-xl py-2 shadow-md"
+                onClick={()=>setModal('nuevaMascota')} 
+                >
+                ➕ Mascota
+              </button>
+              <button 
+                className="flex-1 bg-blue-500 hover:bg-blue-600 transition text-white font-medium rounded-xl py-2 shadow-md"
+                onClick={()=>setModal('nuevaCita')} 
+              >
+                ➕ Cita
+              </button>
+            </div>
+
+          </div>
+          {/* Lista de mascotas */}
+          <div>
+            <PetList
+              mascotas={mascotas}
+              onMascotaCreaada={setMascotaCreada}
+            />
+            {mascotas.length === 0 && (
+              <div className="bg-white p-6 rounded-2xl shadow-md text-center text-gray-500">
+                🐾 Aún no tienes mascotas registradas
+              </div>
+            )}
+          </div>
+
+        </div>
+        <div className='md:col-span-2'>
+          <CitasList
+            citas={citas}
+          />
+          {citas.length=== 0 && (
+            <div className='text-gray-500 text-center py-6'>
+              No tienes citas Programadas
+            </div>
+          )}
+        </div>
+      </div>
+
       {Modal === 'nuevaMascota' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center pt-20 bg-black/50">
-          <button onClick={() => setModal('')} className="mb-4 text-black hover:bg-[#ffb282] font-extrabold text-xl bg-[#fff8e1] border-2 border-[#d2691e] rounded-2xl p-2 pl-3 pr-3 ">✕</button>
-          <PetCard
-          cliente_id={cliente.id}
-          onMascotaCreada={setMascotaCreada}
-          ></PetCard>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          
+          <div className="
+            bg-[#fff8e1] 
+            w-[90vw] 
+            md:w-[34vw] 
+            max-h-[90vh] 
+            overflow-y-auto 
+            rounded-xl 
+            shadow-2xl 
+            border-2 
+            border-[#D2691E] 
+            p-6 
+            relative
+          ">
+            <PetCard
+            cliente_id={cliente.id}
+            onMascotaCreada={setMascotaCreada}
+            ></PetCard>
+            <button onClick={() => setModal('')} className="mb-4 text-black hover:bg-[#ffb282] font-bold bg-[#fff8e1] border-2 border-[#d2691e] rounded-2xl mt-1 p-2 pl-3 pr-3 w-full">Cancelar</button>
+          </div>
         </div>
       )}
       {Modal === 'nuevaCita' && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center pt-20 bg-black/50'>
-          <button onClick={() => setModal('')} className="mb-4 text-black hover:bg-[#ffb282] font-extrabold text-xl bg-[#fff8e1] border-2 border-[#d2691e] rounded-2xl p-2 pl-3 pr-3 ">✕</button>
-          <NuevaCita
-            clienteId={cliente.id}
-            mascotas={mascotas}
-          />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          
+          <div className="
+            bg-[#fff8e1] 
+            w-[90vw] 
+            md:w-[34vw] 
+            max-h-[90vh] 
+            overflow-y-auto 
+            rounded-xl 
+            shadow-2xl 
+            border-2 
+            border-[#D2691E] 
+            p-6 
+            relative
+          ">
+            <NuevaCita
+              clienteId={cliente.id}
+              mascotas={mascotas}
+              onRefresh={async ()=> await fetchCitasIdCliente(cliente.id)}
+            />
+            <button onClick={() => setModal('')} className="mb-4 text-black hover:bg-[#ffb282] font-bold bg-[#fff8e1] border-2 border-[#d2691e] rounded-2xl mt-1 p-2 pl-3 pr-3 w-full">Cancelar</button>
 
+          </div>
         </div>
       )}
-      <div className='flex flex-col gap-5 text-black bg-[#FFF8E1] '>
-        {/* Datos del cliente */}
-        <div className="flex  flex-col bg-[#FFFfff] border border-[#d2691e] p-5 rounded-lg shadow-md items-center">
-          <div className='font-extrabold w-full'>Bienvenido {cliente?.nombre}</div>
-          <div className='flex flex-row w-full'>
-            <div className='w-1/2'>Email:</div>
-            <div className='w-auto'>{cliente?.email}</div>
-          </div>
-          <div className='flex flex-row w-full'>
-            <div className='w-1/2'>Telefono</div>
-            <div className='w-auto'>{cliente?.telefono}</div>
-          </div>
-          <div className='flex flex-col md:flex-row gap-3 justify-between w-full'>
-            <button className='bg-green-500 rounded-lg shadow-md hover:bg-green-600 cursor-pointer p-4'
-              onClick={()=> {setModal('nuevaMascota')}}
-            >➕Mascota</button>
-            <button className='bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 cursor-pointer p-4 text-white'
-              onClick={()=> {setModal('nuevaCita');console.log('datos del mascotas antes de enviarse: ',mascotas)}}
-            >➕CITA</button>
-          </div>
-        </div>
-        {/* Lista de mascotas */}
-          <PetList
-            mascotas={mascotas}
-            onMascotaCreaada={setMascotaCreada}
-          />
-
-      </div>
-
-      {/* Lista de citas anteriores */}
-      <CitasList
-      citas={citas}
-      />
     </div>
   );
 }
