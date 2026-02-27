@@ -7,6 +7,7 @@ import Agenda from '../app/agenda/page';
 import NavBar from '../components/NavBar';
 import ConfirmacionCita from '@/components/ConfirmacionCita';
 import Image from 'next/image';
+import FirstRegister from '@/components/FirstRegister';
 
 export default function Home() {
   const [currentViewMain, setCurrentViewMain] = useState('home');
@@ -20,13 +21,30 @@ export default function Home() {
   const handlerCurrentContent = () => {
     setCurrentViewMain('home');
   }
+  const existUser = async () => {
+    try {
+      const res = await fetch('/api/verify')
+      const data = await res.json()
+      return data
+    } catch (error) {
+      console.error('Error en la verificacion de existencia de usuarios:', error)
+    }
+  }
+  const handleLogin = async () => {
+    const data = await existUser()
+    if(!data){
+      setModal('firstRegister')
+    }else{
+      setModal('Usuario')
+    }
+  }
 
   return (
     <>
       <NavBar
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
-        handleLogin={() => setModal('Usuario')}
+        handleLogin={handleLogin}
         handleReturning={handleReturning}
         handleCurrentContent={handlerCurrentContent}
       />
@@ -63,6 +81,14 @@ export default function Home() {
           <div className= "p-6 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto" style={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}>
             <button onClick={() => setModal('home')} className="mb-4 text-black hover:bg-[#ffb282] font-extrabold text-xl bg-[#fff8e1] border-2 border-[#d2691e] rounded-2xl p-2 pl-3 pr-3 ">✕</button>
              <ConfirmacionCita />
+          </div>
+        </div>
+      )}
+      {Modal === 'firstRegister' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center pt-20" style={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}>
+          <div className= "p-6 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto" style={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}>
+            <button onClick={() => setModal('home')} className="mb-4 text-black hover:bg-[#ffb282] font-extrabold text-xl bg-[#fff8e1] border-2 border-[#d2691e] rounded-2xl p-2 pl-3 pr-3 ">✕</button>
+             <FirstRegister />
           </div>
         </div>
       )}

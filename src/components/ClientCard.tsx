@@ -38,7 +38,7 @@ export default function ClientCard({ onCLienteCreado }: ClientForm) {
       if (!res.ok) {
         setMensaje(data.message || 'Error al registrar cliente');
       } else {
-        onCLienteCreado(data.id);
+        onCLienteCreado(data.data_single.id);
         setMensaje('Cliente registrado exitosamente');
       }
     } catch (error) {

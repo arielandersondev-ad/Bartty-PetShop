@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Cita" ALTER COLUMN "fecha" SET DATA TYPE DATE;

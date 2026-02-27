@@ -97,3 +97,51 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: error?.message || 'Error en el servidor' }, { status: 500 })
   }
 }
+
+export async function PATCH (req: Request) {
+  const body = await req.json()
+  const { id, ...data } = body
+  const dateOnly = data.fecha ? new Date(data.fecha) : undefined
+  const isoDate = dateOnly ? dateOnly.toISOString().split('T')[0] : undefined
+  const dataFormat = {
+    clienteId: data.cliente_id,
+    mascotaId: data.mascota_id,
+    fecha: dateOnly,
+    horaInicio: isoDate && typeof data.hora_inicio === 'string' ? new Date(`${isoDate}T${data.hora_inicio}:00.000Z`) : undefined,
+    horaFin: isoDate && typeof data.hora_fin === 'string' ? new Date(`${isoDate}T${data.hora_fin}:00.000Z`) : undefined,
+    estado: data.estado,
+    observaciones: data.observaciones,
+    estiloCorte: data.estilo_corte,
+  }
+  try {
+    const cita = await prisma.cita.update({
+      where: { id },
+      data: dataFormat,
+    })
+    return NextResponse.json(toSnakeCita(cita))
+  } catch (error: any) {
+    return NextResponse.json({ error: error?.message || 'Error en el servidor' }, { status: 500 })
+  }
+}
+export async function POST(req: Request) {
+  const body = await req.json()
+  const { cliente_id, mascota_id, fecha, hora_inicio, hora_fin, estado, observaciones, estilo_corte } = body
+  const fechaDate = new Date(fecha)
+  try {
+    const cita = await prisma.cita.create({
+      data: {
+        clienteId: cliente_id,
+        mascotaId: mascota_id,
+        fecha:fechaDate,
+        horaInicio: hora_inicio,
+        horaFin: hora_fin,
+        estado,
+        observaciones,
+        estiloCorte: estilo_corte,
+      },
+    })
+    return NextResponse.json(toSnakeCita(cita))
+  } catch (error: any) {
+    return NextResponse.json({ error: error?.message || 'Error en el servidor' }, { status: 500 })
+  }
+}

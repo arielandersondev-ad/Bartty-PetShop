@@ -21,7 +21,9 @@ export default function ClientesAdmin() {
       const response = await fetch ('/api/clientes');
       const data = await response.json();
       if (response.ok) {
-        setClientes(data);
+        console.log("data: ",data)
+        console.log("data tratada: ",data.data)
+        setClientes(data.data);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al cargar clientes');

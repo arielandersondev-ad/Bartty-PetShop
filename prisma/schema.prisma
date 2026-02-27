@@ -96,7 +96,7 @@ model Cita {
   id           String       @id @default(uuid())
   clienteId    String
   mascotaId    String
-  fecha        DateTime
+  fecha        DateTime @db.Date
   horaInicio   DateTime?
   horaFin      DateTime?
   estado       EstadoCita
@@ -178,7 +178,7 @@ model Usuario {
   email          String      @unique
   password       String
   rol            RolUsuario
-  activo         Boolean     @default(true)
+  activo         String     
   createdAt      DateTime    @default(now())
   ci             String?
   telefono       String?

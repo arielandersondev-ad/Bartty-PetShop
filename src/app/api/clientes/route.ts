@@ -65,8 +65,38 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const body = await req.json()
+  const action = body.action
+  const ci = body.ci
+  const nombre = body.nombre
+  if (action === 'loginCliente') {
+    if (!ci || !nombre) {
+      return NextResponse.json(
+        { error: 'CI y nombre son obligatorios' },
+        { status: 400 }
+      )
+    }
+    
+    const cliente = await prisma.cliente.findUnique({where: {ci}})
+
+    if (!cliente) {
+      return NextResponse.json(
+        { error: 'Cliente no encontrado' },
+        { status: 401 }
+      )
+    }
+
+    if (cliente.nombre !== nombre) {
+      return NextResponse.json(
+        { error: 'El nombre no coincide' },
+        { status: 401 }
+      )
+    }
+
+    return NextResponse.json({ message: 'Login exitoso', cliente })
+  }
   try {
-    const body = await req.json()
+    
     const created = await prisma.cliente.create({
       data: {
         ci: body.ci,
@@ -116,5 +146,28 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ success: true })
   } catch (error: any) {
     return NextResponse.json({ error: error?.message || 'Error al eliminar cliente' }, { status: 400 })
+  }
+}
+
+export async function PATCH (req: Request) {
+  try {
+    const body = await req.json()
+    const { id, ...rest } = body
+    if (!id) return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
+    const updated = await prisma.cliente.update({
+      where: { id },
+      data: {
+        ci: rest.ci,
+        nombre: rest.nombre,
+        apellidoPaterno: rest.apellido_paterno,
+        apellidoMaterno: rest.apellido_materno,
+        email: rest.email,
+        telefono: rest.telefono,
+        numeroReferido: rest.numero_referido,
+      },
+    })
+    return NextResponse.json({ success: true, data_single: toSnakeCliente(updated) })
+  } catch (error: any) {
+    return NextResponse.json({ error: error?.message || 'Error al actualizar cliente' }, { status: 400 })
   }
 }

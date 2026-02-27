@@ -9,7 +9,7 @@ export default function PetCard ({cliente_id, onMascotaCreada,disabled}: PetForm
     nombre:'',
     raza:'',
     color:'',
-    edad:'',
+    edad:0,
     tamano:'',
     vacuna_antirrabica:false,
     sexo:'',
@@ -18,10 +18,12 @@ export default function PetCard ({cliente_id, onMascotaCreada,disabled}: PetForm
   const [loading,setLoading]=useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value
-    });
+    const target = e.target as HTMLInputElement | HTMLTextAreaElement;
+    const { name } = target;
+    const value = (target as HTMLInputElement).type === 'number'
+      ? (target.value === '' ? 0 : Number(target.value))
+      : target.value;
+    setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async(e: React.FormEvent) => {
@@ -34,7 +36,8 @@ export default function PetCard ({cliente_id, onMascotaCreada,disabled}: PetForm
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           ...form,
-          'cliente_id':cliente_id 
+          cliente_id: cliente_id,
+          vacuna_antirrabica: String(form.vacuna_antirrabica)
         })
       })
       

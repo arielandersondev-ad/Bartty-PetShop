@@ -6,7 +6,7 @@ function toSnakeServicio(s: any) {
     id: s.id,
     created_at: s.createdAt,
     servicio: s.servicio ?? null,
-    valor: s.valor ?? null,
+    valor: typeof s.valor === 'bigint' ? Number(s.valor) : s.valor ?? null,
     usuario_id: s.usuarioId ?? null,
     cita_id: s.citaId ?? null,
   }
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     const created = await prisma.servicioCita.create({
       data: {
         servicio,
-        valor,
+        valor: typeof valor === 'number' ? BigInt(valor) : valor,
         usuarioId: usuario_id,
         citaId: cita_id,
       },
