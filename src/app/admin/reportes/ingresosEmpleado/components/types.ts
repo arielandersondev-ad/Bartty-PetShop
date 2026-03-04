@@ -15,10 +15,10 @@ export type ReportDetail = {
   tipo_pago: string
 }
 export type ReportEmpServDetail = {
-  fecha_servicio: string
+  fecha: string
   fecha_cita:string
   servicio: string
-  monto_servicio: number
+  monto: number
 }
 
 

@@ -1,6 +1,6 @@
 import React from 'react';
 type ClientForm = {
-  onCLienteCreado: (clienteId: string) => void;
+  onCLienteCreado: (clienteId: string, ci: string) => void;
 };
 export default function ClientCard({ onCLienteCreado }: ClientForm) {
   const [form, setForm] = React.useState({
@@ -38,7 +38,7 @@ export default function ClientCard({ onCLienteCreado }: ClientForm) {
       if (!res.ok) {
         setMensaje(data.message || 'Error al registrar cliente');
       } else {
-        onCLienteCreado(data.id);
+        onCLienteCreado(data.data_single.id, data.data_single.ci);
         setMensaje('Cliente registrado exitosamente');
       }
     } catch (error) {

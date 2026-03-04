@@ -190,7 +190,7 @@ export function IncomeReportPDF({ data, dateRange }: IncomeReportPDFProps) {
                 <View key={index} style={styles.tableRow}>
                   <View style={styles.tableCol}>
                     <Text style={styles.cellText}>
-                      {formatDate(item.fecha_servicio)}
+                      {formatDate(item.fecha)}
                     </Text>
                   </View>
                   <View style={styles.tableCol}>
@@ -200,7 +200,7 @@ export function IncomeReportPDF({ data, dateRange }: IncomeReportPDFProps) {
                   </View>
                   <View style={styles.tableCol}>
                     <Text style={styles.cellText}>
-                      Bs {(item.monto_servicio ?? 0).toFixed(2)}
+                      Bs {(item.monto ?? 0).toFixed(2)}
                     </Text>
                   </View>
                 </View>

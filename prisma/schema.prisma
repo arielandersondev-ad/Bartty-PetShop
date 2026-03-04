@@ -96,7 +96,7 @@ model Cita {
   id           String       @id @default(uuid())
   clienteId    String
   mascotaId    String
-  fecha        DateTime
+  fecha        DateTime @db.Date
   horaInicio   DateTime?
   horaFin      DateTime?
   estado       EstadoCita
@@ -129,6 +129,7 @@ model Producto {
   unidadMedidaId  String
   precioCompra    Decimal
   precioVenta     Decimal
+  unidadMinimaVenta Decimal?
   descripcion     String?
   stockMinimo     Int      @default(0)
   estado          Boolean  @default(true)
@@ -137,12 +138,13 @@ model Producto {
 
   categoria      Categoria      @relation(fields: [categoriaId], references: [id])
   unidadMedida   UnidadMedida   @relation(fields: [unidadMedidaId], references: [id])
-  inventario     Inventario?
+  inventarios    Inventario[]
   movimientos    MovimientoInventario[]
 }
 
 model Inventario {
-  productoId String   @id
+  id         String   @id @default(uuid())
+  productoId String
   cantidad   Int      @default(0)
   updatedAt  DateTime @updatedAt
 
@@ -178,7 +180,7 @@ model Usuario {
   email          String      @unique
   password       String
   rol            RolUsuario
-  activo         Boolean     @default(true)
+  activo         String     
   createdAt      DateTime    @default(now())
   ci             String?
   telefono       String?

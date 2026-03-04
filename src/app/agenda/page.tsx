@@ -167,7 +167,7 @@ export default function Agenda() {
           ">
             <PetCard
             cliente_id={cliente.id}
-            onMascotaCreada={setMascotaCreada}
+            onMascotaCreada={() => setMascotaCreada(true)}
             ></PetCard>
             <button onClick={() => setModal('')} className="mb-4 text-black hover:bg-[#ffb282] font-bold bg-[#fff8e1] border-2 border-[#d2691e] rounded-2xl mt-1 p-2 pl-3 pr-3 w-full">Cancelar</button>
           </div>

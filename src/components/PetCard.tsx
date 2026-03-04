@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 interface PetForm {
   cliente_id: string;
   disabled?: boolean;
-  onMascotaCreada?: React.Dispatch<React.SetStateAction<boolean>>
+  onMascotaCreada?: () => void;
 }
 export default function PetCard ({cliente_id, onMascotaCreada,disabled}: PetForm) {
   const [form ,setForm] = useState({
     nombre:'',
     raza:'',
     color:'',
-    edad:'',
+    edad:0,
     tamano:'',
     vacuna_antirrabica:false,
     sexo:'',
@@ -18,10 +18,12 @@ export default function PetCard ({cliente_id, onMascotaCreada,disabled}: PetForm
   const [loading,setLoading]=useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value
-    });
+    const target = e.target as HTMLInputElement | HTMLTextAreaElement;
+    const { name } = target;
+    const value = (target as HTMLInputElement).type === 'number'
+      ? (target.value === '' ? 0 : Number(target.value))
+      : target.value;
+    setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async(e: React.FormEvent) => {
@@ -34,7 +36,8 @@ export default function PetCard ({cliente_id, onMascotaCreada,disabled}: PetForm
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           ...form,
-          'cliente_id':cliente_id 
+          cliente_id: cliente_id,
+          vacuna_antirrabica: String(form.vacuna_antirrabica)
         })
       })
       
@@ -45,7 +48,7 @@ export default function PetCard ({cliente_id, onMascotaCreada,disabled}: PetForm
       }
       
       const data = await res.json()
-      onMascotaCreada?.(prev => !prev)
+      onMascotaCreada?.()
       console.log('datos registrados de la mascota: ',data)
     } catch (error) {
       console.error('Error en handleSubmit:', error)
@@ -54,7 +57,7 @@ export default function PetCard ({cliente_id, onMascotaCreada,disabled}: PetForm
   }
 
   return (
-    <div>
+    <div className="p-2 bg-[#fff8e1] border-2 border-[#d2691e] rounded-2xl">
       <h2 className="text-xl font-semibold text-black mb-4">Datos de la Mascota</h2>
       <fieldset disabled={disabled} className={disabled ? 'opacity-50 pointer-events-none' : ''}>
         <form onSubmit={handleSubmit} className="space-y-6">
