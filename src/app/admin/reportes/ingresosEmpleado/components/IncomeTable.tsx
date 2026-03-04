@@ -40,13 +40,13 @@ const formatCurrency = (amount?: number) => {
               `}
             >
               <td className="py-3 px-4 text-sm text-gray-700">
-                {formatDate(item.fecha_servicio)}
+                {formatDate(item.fecha)}
               </td>
               <td className="py-3 px-4 text-gray-700">
                 {item.servicio}
               </td>
               <td className="py-3 px-4 text-gray-700">
-                {item.monto_servicio}
+                {item.monto}
               </td>
             </tr>
           ))}
@@ -58,7 +58,7 @@ const formatCurrency = (amount?: number) => {
                 Total:
               </td>
               <td className="py-3 px-4 font-bold text-lg">
-                {formatCurrency(data.reduce((sum, item) => sum + item.monto_servicio, 0))}
+                {formatCurrency(data.reduce((sum, item) => sum + item.monto, 0))}
               </td>
             </tr>
           </tfoot>

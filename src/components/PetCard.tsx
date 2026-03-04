@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 interface PetForm {
   cliente_id: string;
   disabled?: boolean;
-  onMascotaCreada?: React.Dispatch<React.SetStateAction<boolean>>
+  onMascotaCreada?: () => void;
 }
 export default function PetCard ({cliente_id, onMascotaCreada,disabled}: PetForm) {
   const [form ,setForm] = useState({
@@ -48,7 +48,7 @@ export default function PetCard ({cliente_id, onMascotaCreada,disabled}: PetForm
       }
       
       const data = await res.json()
-      onMascotaCreada?.(prev => !prev)
+      onMascotaCreada?.()
       console.log('datos registrados de la mascota: ',data)
     } catch (error) {
       console.error('Error en handleSubmit:', error)
@@ -57,7 +57,7 @@ export default function PetCard ({cliente_id, onMascotaCreada,disabled}: PetForm
   }
 
   return (
-    <div>
+    <div className="p-2 bg-[#fff8e1] border-2 border-[#d2691e] rounded-2xl">
       <h2 className="text-xl font-semibold text-black mb-4">Datos de la Mascota</h2>
       <fieldset disabled={disabled} className={disabled ? 'opacity-50 pointer-events-none' : ''}>
         <form onSubmit={handleSubmit} className="space-y-6">

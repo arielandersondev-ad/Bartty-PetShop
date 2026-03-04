@@ -129,6 +129,7 @@ model Producto {
   unidadMedidaId  String
   precioCompra    Decimal
   precioVenta     Decimal
+  unidadMinimaVenta Decimal?
   descripcion     String?
   stockMinimo     Int      @default(0)
   estado          Boolean  @default(true)
@@ -137,12 +138,13 @@ model Producto {
 
   categoria      Categoria      @relation(fields: [categoriaId], references: [id])
   unidadMedida   UnidadMedida   @relation(fields: [unidadMedidaId], references: [id])
-  inventario     Inventario?
+  inventarios    Inventario[]
   movimientos    MovimientoInventario[]
 }
 
 model Inventario {
-  productoId String   @id
+  id         String   @id @default(uuid())
+  productoId String
   cantidad   Int      @default(0)
   updatedAt  DateTime @updatedAt
 

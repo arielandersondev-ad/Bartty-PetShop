@@ -9,7 +9,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ message: 'es necesario el rol del empleado' }, { status: 400 })
     }
     const empleados = await prisma.usuario.findMany({
-      where: { rol: rol as any, activo: true },
+      where: { rol: rol as any, activo: 'true' },
     })
     return NextResponse.json(empleados.map((u:any) => ({ id: u.id, nombre: u.nombre, email: u.email, rol: u.rol, activo: u.activo })))
   } catch (error: any) {

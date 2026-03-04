@@ -28,6 +28,41 @@ export async function GET(req: Request) {
   const id = searchParams.get('id')
 
   try {
+
+    if (action === 'citasConfirmadas') {
+      const citas = await prisma.cita.findMany({
+        select:{
+          fecha: true,
+          horaInicio: true,
+          horaFin: true,
+          estado: true,
+          estiloCorte: false,
+        },
+        where: { estado: 'confirmado' },
+        orderBy: { createdAt: 'desc' },
+      })
+      return NextResponse.json(citas.map((c: any) => toSnakeCita(c)))
+    }
+    if (action === 'fechasNoDisponibles') {
+      const fechasAgrupadas = await prisma.cita.groupBy({
+        by: ['fecha'],
+        where: {
+          estado: 'confirmado'
+        },
+        _count: {
+          fecha: true
+        }
+      })
+
+      const fechasNoDisponibles = fechasAgrupadas
+        .filter(f => f._count.fecha >= 4)
+        .map(f => f.fecha)
+
+      return NextResponse.json({
+        success: true,
+        data: fechasNoDisponibles
+      })
+    }
     if (action === 'bypetid') {
       const citas = await prisma.cita.findMany({
         where: { mascotaId: id || undefined },
