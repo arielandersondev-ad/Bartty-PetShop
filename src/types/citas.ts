@@ -8,4 +8,5 @@ export interface Cita {
   observaciones: string
   mascota: {nombre: string}
   cliente: {ci:string, telefono:string,nombre: string, apellido_paterno: string}
+  servicios: []
 }

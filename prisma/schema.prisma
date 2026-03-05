@@ -194,7 +194,7 @@ model ServicioCita {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   servicio  String?
-  valor     BigInt?
+  valor     Decimal? @db.Decimal(10,2)
   usuarioId String?
   citaId    String?
 

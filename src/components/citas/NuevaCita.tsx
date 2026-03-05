@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { useState } from 'react'
+import DisabledDatePicker from '@/components/DatePicker/DisabledDatePicker'
 
 type CitaForm = {
   cliente_id: string
@@ -61,9 +62,12 @@ export default function NuevaCita({clienteId, mascotas, onRefresh}: TNuevaCita) 
   function handleConfirmar (confirmar: boolean){
     setConfirmar(!confirmar)
   }
+  const handleFechaChange = (fecha: string) => {
+    setForm(prev => ({ ...prev, fecha }))
+  }
 
   return (
-    <div className=''>
+    <div className='bg-white p-4'>
       <form
         onSubmit={handleSubmit}
         className="text-black"
@@ -87,17 +91,14 @@ export default function NuevaCita({clienteId, mascotas, onRefresh}: TNuevaCita) 
               ))}
             </select>
           </div>
-          <div className='flex flex-row rounded-2xl border border-amber-600 px-2 py-2 gap-2'>
+          <div>
             <div className='font-bold'>
               Para el:  
             </div>
-            <input
-              type="date"
-              name="fecha"
-              value={form.fecha}
-              onChange={handleChange}
-              required
-            />
+              <DisabledDatePicker
+                value={form.fecha}
+                onChange={handleFechaChange}
+              />
           </div>
           <div
             className='flex flex-row rounded-2xl border border-amber-600 hover:bg-amber-500 px-2 py-2 justify-center'

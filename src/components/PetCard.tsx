@@ -240,7 +240,7 @@ export default function PetCard ({cliente_id, onMascotaCreada,disabled}: PetForm
           </div>
 
           {/* Botón */}
-          {cliente_id?.length !== 0 && (
+          {cliente_id?.length !== 0 ? (
             <button
               type="submit"
               disabled={loading}
@@ -248,7 +248,7 @@ export default function PetCard ({cliente_id, onMascotaCreada,disabled}: PetForm
             >
               {loading ? "Registrando..." : "Registrar Mascota"}
             </button>
-          )}
+          ):(<div>no hay id de cliente</div>)}
 
         </form>
 

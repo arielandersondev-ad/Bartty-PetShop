@@ -76,8 +76,8 @@ export default function Home() {
         </div>
       )}
       {Modal === 'firstRegister' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center pt-20" style={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}>
-          <div className= "p-6 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto" style={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center pt-20 bg-black/50 ">
+          <div className= "p-6 rounded-lg max-w-full md:max-w-1/3 w-full mx-4 max-h-[90vh] overflow-y-auto ">
             <button onClick={() => setModal('home')} className="mb-4 text-black hover:bg-[#ffb282] font-extrabold text-xl bg-[#fff8e1] border-2 border-[#d2691e] rounded-2xl p-2 pl-3 pr-3 ">✕</button>
              <FirstRegister />
           </div>

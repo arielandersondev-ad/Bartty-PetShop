@@ -159,7 +159,7 @@ CREATE TABLE "ServicioCita" (
     "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "servicio" TEXT,
-    "valor" BIGINT,
+    "valor" DECIMAL(65,30),
     "usuarioId" TEXT,
     "citaId" TEXT,
 

@@ -9,7 +9,19 @@ export default function CitasAdmin() {
   const [allcitas, setAllCitas] = useState<Cita[]>([])
   const [modal, setModal]  = useState("");
   const [detail, setDetail] = useState<Cita>({} as Cita);
-  
+  function formatDateDMY(value?: string | null): string {
+    if (!value) return '-'
+
+    const parts = value.split('-')
+    if (parts.length !== 3) return '-'
+
+    const [year, month, day] = parts
+    return `${day}-${month}-${year}`
+  }
+  function formatServicios(servicios?: any[]) {
+    const serviciosFormatted = servicios?.map((s: any) => s.nombre).join(', ')
+    return serviciosFormatted
+  }
   const columns: ColumnConfig<Cita>[] = [
     {
       key: 'fecha',
@@ -17,6 +29,7 @@ export default function CitasAdmin() {
       type: 'date',
       sortable: true,
       searchable: true,
+      render: (value, row) => formatDateDMY(value),
     },
     {
       key: 'hora_inicio',
@@ -33,7 +46,7 @@ export default function CitasAdmin() {
       searchable: true,
     },
     {
-      key: 'cliente',
+      key: 'cliente.nombre',
       label: 'Cliente',
       type: 'text',
       sortable: true,
@@ -49,10 +62,11 @@ export default function CitasAdmin() {
       searchable: true,
     },
     {
-      key: 'observaciones',
-      label: 'Observaciones',
+      key: 'servicios',
+      label: 'Servicios',
       type: 'text',
       searchable: true,
+      render: (value) => formatServicios(value),
     },
     {
       key: 'estado',

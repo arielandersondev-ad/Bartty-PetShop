@@ -6,9 +6,9 @@ function toSnakeCita(c: any, includeRelations = false) {
     id: c.id,
     cliente_id: c.clienteId,
     mascota_id: c.mascotaId,
-    fecha: c.fecha,
-    hora_inicio: c.horaInicio ?? null,
-    hora_fin: c.horaFin ?? null,
+    fecha: c.fecha.toISOString().split('T')[0],
+    hora_inicio: c.horaInicio?.toISOString().split('T')[1].split('.')[0] ?? null,
+    hora_fin: c.horaFin?.toISOString().split('T')[1].split('.')[0] ?? null,
     estado: c.estado,
     observaciones: c.observaciones ?? null,
     estilo_corte: c.estiloCorte ?? null,
@@ -19,6 +19,7 @@ function toSnakeCita(c: any, includeRelations = false) {
     ...base,
     mascota: c.mascota ? { nombre: c.mascota.nombre } : undefined,
     cliente: c.cliente ? { nombre: c.cliente.nombre, apellido_paterno: c.cliente.apellidoPaterno ?? null, ci: c.cliente.ci, telefono: c.cliente.telefono } : undefined,
+    servicio: c.servicio ? { nombre: c.servicio.nombre } : undefined,
   }
 }
 
@@ -53,14 +54,15 @@ export async function GET(req: Request) {
           fecha: true
         }
       })
-
+      console.log('deboug de fechas : ',fechasAgrupadas)
       const fechasNoDisponibles = fechasAgrupadas
         .filter(f => f._count.fecha >= 4)
-        .map(f => f.fecha)
+        .map(f => f.fecha.toISOString().split('T')[0])
 
       return NextResponse.json({
         success: true,
-        data: fechasNoDisponibles
+        data: fechasNoDisponibles,
+        message: 'Fechas no disponibles'
       })
     }
     if (action === 'bypetid') {
@@ -118,6 +120,7 @@ export async function GET(req: Request) {
       include: {
         mascota: { select: { nombre: true } },
         cliente: { select: { nombre: true, apellidoPaterno: true } },
+        servicios: { select: { servicio: true, valor: true } },
       },
       orderBy: { createdAt: 'desc' },
     })
@@ -126,6 +129,10 @@ export async function GET(req: Request) {
         ...toSnakeCita(c),
         mascota: { nombre: c.mascota?.nombre },
         cliente: { nombre: c.cliente?.nombre, apellido_paterno: c.cliente?.apellidoPaterno ?? null },
+        servicios: c.servicios?.map((s: any) => ({
+          nombre: s.servicio, 
+          precio: Number(s.valor),
+        })),
       })),
     )
   } catch (error: any) {
