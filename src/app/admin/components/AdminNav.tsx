@@ -13,12 +13,26 @@ export default function AdminNav({ isSidebarOpen, setIsSidebarOpen,  }: AdminNav
   const router = useRouter();
   const sessionCookie = Cookies.get('session');
   const sesion = JSON.parse(sessionCookie || '{}');
-  const {rol, nombre} = sesion;
   const [mounted, setMounted]=useState(false)
+  const [nombre,setNombre] = useState('')
+  const [rolSesion,setRolSesion] = useState('')
+  const {rol, id} = sesion;
   useEffect(() => {
-    const load = async () => setMounted(true)
-    load()
-  }, [])
+    if (!['admin','emp_servicio','emp_recepcion'].includes(rol)) {
+      router.push('/');
+    }
+
+    async function getNombre() {
+      const res = await fetch(`/api/usuario/?id=${id}`);
+      const data = await res.json();
+      setNombre(data.nombre);
+      setRolSesion(data.rol);
+    }
+
+    if (id) getNombre();
+
+    setMounted(true);
+  }, [rol, id]);
   if (!mounted) return null
 
   return (
@@ -50,90 +64,111 @@ export default function AdminNav({ isSidebarOpen, setIsSidebarOpen,  }: AdminNav
         </div>
       </nav>
       {/* Sidebar */}
+{/* Sidebar */}
       <div
         className={`
-          fixed top-16 left-0 
-          h-[calc(100vh-4rem)] 
-          w-72 md:w-80 
+          fixed top-0 left-0 
+          h-screen
+          w-72 md:w-80
           z-40
           transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           transition-transform duration-300 ease-in-out
-          shadow-2xl
         `}
       >
+        <div className="h-full p-6 backdrop-blur-xl bg-white/10 border-r border-white/20 shadow-2xl">
 
-        <div className="p-5 flex h-full">
-          <div className="text-center max-w-md w-full">
-            <div className="text-2xl md:text-3xl font-bold text-white mb-8 flex flex-col gap-5">
-              <div>
-                {rol || 'Administracion'}
-              </div>
-              <div>
-                {nombre || 'Usuario'}
-              </div>
+          {/* Usuario */}
+          <div className="mb-10">
+            <div className="text-black text-xl font-semibold">
+              {rolSesion || 'Administración'}
             </div>
-            <ul className="space-y-4">
-              <li>
-                <button
-                  onClick={() => { router.push('/admin'); setIsSidebarOpen(false); }}
-                  className="w-full text-left bg-white bg-opacity-20 hover:bg-opacity-30 text-black font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md backdrop-blur-sm border border-white border-opacity-20"
-                >
-                  📊 Dashboard
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => { router.push('/admin/citas'); setIsSidebarOpen(false); }}
-                  className="w-full text-left bg-white bg-opacity-20 hover:bg-opacity-30 text-black font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md backdrop-blur-sm border border-white border-opacity-20"
-                >
-                  📅 Citas
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => { router.push('/admin/clientes'); setIsSidebarOpen(false); }}
-                  className="w-full text-left bg-white bg-opacity-20 hover:bg-opacity-30 text-black font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md backdrop-blur-sm border border-white border-opacity-20"
-                >
-                  👥 Clientes
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => { router.push('/admin/inventario'); setIsSidebarOpen(false); }}
-                  className="w-full text-left bg-white bg-opacity-20 hover:bg-opacity-30 text-black font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md backdrop-blur-sm border border-white border-opacity-20"
-                >
-                  📦 Inventario
-                </button>
-              </li>
-              {rol === 'admin' && (
-                <li>
-                  <button
-                    onClick={() => { router.push('/admin/reportes'); setIsSidebarOpen(false); }}
-                    className="w-full text-left bg-white bg-opacity-20 hover:bg-opacity-30 text-black font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md backdrop-blur-sm border border-white border-opacity-20"
-                  >
-                    📄 Reportes
-                  </button>
-                </li>
-              )}
-              {rol === 'admin' && (
-                <li>
-                  <button
-                    onClick={() => { router.push('/admin/usuarios'); setIsSidebarOpen(false); }}
-                    className="w-full text-left bg-white bg-opacity-20 hover:bg-opacity-30 text-black font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md backdrop-blur-sm border border-white border-opacity-20"
-                  >
-                    😶‍🌫️ Usuarios
-                  </button>
-                </li>
-              )}
-            </ul>
+            <div className="text-black/70 text-sm">
+              {nombre || 'Usuario'}
+            </div>
+
+            <div className="mt-4 h-[1px] bg-white/20"/>
           </div>
+
+          {/* Menu */}
+          <ul className="space-y-2">
+
+            <SidebarItem
+              label="Dashboard"
+              icon="📊"
+              onClick={() => { router.push('/admin'); setIsSidebarOpen(false); }}
+            />
+
+            <SidebarItem
+              label="Citas"
+              icon="📅"
+              onClick={() => { router.push('/admin/citas'); setIsSidebarOpen(false); }}
+            />
+
+            <SidebarItem
+              label="Clientes"
+              icon="👥"
+              onClick={() => { router.push('/admin/clientes'); setIsSidebarOpen(false); }}
+            />
+
+            <SidebarItem
+              label="Inventario"
+              icon="📦"
+              onClick={() => { router.push('/admin/inventario'); setIsSidebarOpen(false); }}
+            />
+
+            {rolSesion === 'admin' && (
+              <SidebarItem
+                label="Reportes"
+                icon="📄"
+                onClick={() => { router.push('/admin/reportes'); setIsSidebarOpen(false); }}
+              />
+            )}
+
+            {rolSesion === 'admin' && (
+              <SidebarItem
+                label="Usuarios"
+                icon="👤"
+                onClick={() => { router.push('/admin/usuarios'); setIsSidebarOpen(false); }}
+              />
+            )}
+
+          </ul>
         </div>
       </div>
       {}
       {/* Overlay */}
       {isSidebarOpen && (
-        <div className="fixed inset-0 z-15 backdrop-blur-sm" style={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }} onClick={() => setIsSidebarOpen(false)}></div>
+        <div className="fixed inset-0 z-15 backdrop-blur-sm " onClick={() => setIsSidebarOpen(false)}></div>
       )}
     </>
   );
+}
+
+function SidebarItem({ label, icon, onClick }: any) {
+  return (
+    <li>
+      <button
+        onClick={onClick}
+        className="
+          w-full flex items-center gap-3
+          text-left
+          px-4 py-3
+          rounded-xl
+          text-black
+          bg-gray-100
+          hover:bg-gray-200
+          transition-all duration-200
+          group
+        "
+      >
+        <span className="text-lg group-hover:scale-110 transition">
+          {icon}
+        </span>
+
+        <span className="font-medium tracking-wide">
+          {label}
+        </span>
+      </button>
+    </li>
+  )
 }
