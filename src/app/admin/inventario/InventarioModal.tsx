@@ -140,6 +140,7 @@ export default function InventarioModal({ onClose, onRefresh, inventario }: {onC
                   onChange={handleChange}
                   className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                 >
+                  <option  value=''>producto ??</option>
                   {productos.map(p => (
                     <option key={p.id} value={p.id}>{p.nombre}</option>
                   ))}

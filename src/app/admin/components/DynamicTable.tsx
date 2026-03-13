@@ -169,14 +169,23 @@ export function DynamicTable<T extends Record<string, any>>({
           </div>
         );
 
-      case 'date':
-        return value
-          ? new Date(value).toLocaleDateString('es-ES', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-            })
-          : '-';
+      case 'date': {
+        const str = typeof value === 'string' ? value : String(value || '')
+        // Fecha "plana" sin hora: 2026-03-05
+        const isPlainDate = /^\d{4}-\d{2}-\d{2}$/.test(str)
+        if (isPlainDate) return str
+
+        // ISO con hora: forzar UTC para no mover el día
+        const d = new Date(str)
+        if (isNaN(d.getTime())) return '-'
+        const fmt = new Intl.DateTimeFormat('es-ES', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          timeZone: 'UTC'
+        })
+        return fmt.format(d)
+      }
 
       case 'status':
         const statusOption = column.statusOptions?.find(

@@ -1,11 +1,16 @@
 import { useState } from 'react';
+import Cookies from 'js-cookie';
 import ClientCard from './ClientCard';
 import PetCard from './PetCard';
 
 export default function AgendaContent({onFinish}: {onFinish: () => void}) {
   const [clienteId, setClienteId] = useState<string>("");
+  const [clienteCi, setClienteCi] = useState<string>("");
   const [clienteCreado, setClienteCreado] = useState(false);
   const redirectCliente= () => {
+    if (clienteId) {
+      Cookies.set('session', JSON.stringify({ type: 'cliente', ci: clienteCi, id: clienteId }), { expires: 1 });
+    }
     onFinish()
   }
   return (
@@ -17,6 +22,7 @@ export default function AgendaContent({onFinish}: {onFinish: () => void}) {
         <ClientCard
           onCLienteCreado={(id:string, ci: string) => {
             setClienteId(id);
+            setClienteCi(ci);
             setClienteCreado(true);
           }}
         />

@@ -134,10 +134,10 @@ export default function ProductoModal({ onClose }: {onClose?: () => void}) {
     }, [])
 
     return(
-        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center">
-        <div className="bg-white p-6 rounded-lg w-full max-w-3xl">
+        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center overflow-auto pt-40">
+        <div className="bg-white p-6 rounded-lg w-90 md:w-full max-w-3xl">
             <div className="flex flex-row justify-between">
-                <h2 className="text-2xl font-bold mb-4">Categorías</h2>
+                <h2 className="text-2xl font-bold mb-4">Productos</h2>
                 <button 
                     onClick={() => onClose?.()}
                     className="text-2xl font-bold mb-4"

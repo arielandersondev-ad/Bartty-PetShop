@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 function toSnakeServicio(s: any) {
   return {
     id: s.id,
     created_at: s.createdAt,
     servicio: s.servicio ?? null,
-    valor: typeof s.valor === 'bigint' ? Number(s.valor) : s.valor ?? null,
+    valor: s.valor ? Number(s.valor) : null,
     usuario_id: s.usuarioId ?? null,
     cita_id: s.citaId ?? null,
   }
@@ -37,7 +38,7 @@ export async function POST(req: Request) {
     const created = await prisma.servicioCita.create({
       data: {
         servicio,
-        valor: typeof valor === 'number' ? BigInt(valor) : valor,
+        valor: new Prisma.Decimal(String(valor)),
         usuarioId: usuario_id,
         citaId: cita_id,
       },

@@ -1,0 +1,14 @@
+.rdrDayDisabled .rdrDayNumber span {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border-radius: 9999px;
+}
+
+.rdrDayDisabled {
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.rdrCalendarWrapper {
+  width: auto;
+}

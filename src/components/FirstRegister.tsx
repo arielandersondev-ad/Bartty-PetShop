@@ -62,10 +62,9 @@ export default function FirstRegister() {
 
   
 return (
-    <div className="bg-[#fff8e1] min-h-screen flex flex-col md:flex-row gap-8 overflow-x-hidden">
-      <div className="md:w-1/3 border-2 border-[#D2691E] rounded-lg p-4">
+    <div className="bg-[#fff8e1] max-h-screen gap-8 overflow-x-hidden border-2 border-[#D2691E] rounded-lg p-4">
+      <div>
         <h1 className="text-[#D2691E] text-center">Registro de Usuario</h1>
-
         <form onSubmit={handleSubmit} className="flex flex-col text-black gap-2 text-center">
           <div>
             <label className="block text-sm font-medium text-black">CI</label>

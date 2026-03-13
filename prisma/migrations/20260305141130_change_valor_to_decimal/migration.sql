@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "ServicioCita" ALTER COLUMN "valor" SET DATA TYPE DECIMAL(65,30);

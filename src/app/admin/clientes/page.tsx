@@ -4,12 +4,16 @@ import { DynamicTable, ColumnConfig, ActionButton } from '../components/DynamicT
 import { customStyles } from '@/styles/colors';
 import { Cliente } from '@/types';
 import DetailClient from './DetailClient';
+import NuevaCita from '@/components/citas/NuevaCita';
+import { Mascota } from '@prisma/client/index-browser';
 
 export default function ClientesAdmin() {
   const [ clientes, setClientes ] = useState<Cliente[]>([]);
   const [ loading, setLoading ] = useState(true);
   const [ error, setError ] = useState<string | null>(null);
   const [ clienteID, setClienteId ] = useState<string>('')
+  const [ modal, setModal ] = useState<string>('')
+  const [ mascotas, setMascotas ] = useState<Mascota[]>([])
 
   useEffect(() => {
     fetchClientes();
@@ -31,12 +35,26 @@ export default function ClientesAdmin() {
       setLoading(false);
     }
   };
-
+  const fetchMascotas = async (id_cliente: string) => {
+    try {
+      const response = await fetch (`/api/mascotas?cliente_id=${id_cliente}`);
+      const data = await response.json();
+      if (response.ok) return data.data;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al cargar mascotas');
+    } finally {
+    }
+  }
   const handleDetallesCliente = (cliente: Cliente) => {
     if (!cliente.id) return
     setClienteId(cliente.id)
-    console.log(cliente.id)
-    console.log('el estado anterior es: ',clienteID)
+  }
+  const handleCitaCliente = async (cliente: Cliente) => {
+    if (!cliente.id) return
+    const mascotasCliente = await fetchMascotas(cliente.id);
+    setMascotas(mascotasCliente)
+    setClienteId(cliente.id)
+    setModal('cita')
   }
 
   const columns: ColumnConfig<Cliente>[] = [
@@ -97,6 +115,11 @@ export default function ClientesAdmin() {
       onClick: handleDetallesCliente,
       variant: 'amarillo',
     },
+    {
+      label: 'Cita',
+      onClick: handleCitaCliente,
+      variant: 'azul',
+    },
   ];
 
   if (loading) {
@@ -151,6 +174,25 @@ export default function ClientesAdmin() {
           </div>
         </div>
       </div>
+      {modal === 'cita' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white w-[90vw] md:w-[34vw] max-h-[90vh] overflow-y-auto relative rounded-xl">
+            <button
+              className="absolute top-2 right-2 text-2xl text-[#D2691E] hover:text-[#8B4513] focus:outline-none"
+              onClick={() => setModal('')}
+            >
+              &times;
+            </button>
+            <div className='mt-5'>
+              <NuevaCita
+                clienteId={clienteID}
+                mascotas={mascotas}
+                onRefresh={() => setModal('')}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

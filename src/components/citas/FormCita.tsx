@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import DisabledDatePicker from '../DatePicker/DisabledDatePicker'
 
 const estados = ['pendiente', 'confirmado', 'cancelado', 'atendido'] as const
 type CitaForm = {
@@ -72,12 +73,9 @@ export default function FormCita({clienteId,mascotas}: {
           </select>
 
           {/* Fecha */}
-          <input
-            type="date"
-            name="fecha"
+          <DisabledDatePicker
             value={form.fecha}
-            onChange={handleChange}
-            required
+            onChange={value => setForm(prev => ({ ...prev, fecha: value }))}
           />
 
           {/* Hora inicio */}
