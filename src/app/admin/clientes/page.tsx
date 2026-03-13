@@ -5,7 +5,7 @@ import { customStyles } from '@/styles/colors';
 import { Cliente } from '@/types';
 import DetailClient from './DetailClient';
 import NuevaCita from '@/components/citas/NuevaCita';
-import { Mascota } from '@prisma/client';
+import { Mascota } from '@prisma/client/index-browser';
 
 export default function ClientesAdmin() {
   const [ clientes, setClientes ] = useState<Cliente[]>([]);

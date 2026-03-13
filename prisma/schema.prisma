@@ -201,3 +201,17 @@ model ServicioCita {
   usuario Usuario? @relation(fields: [usuarioId], references: [id])
   cita    Cita?    @relation(fields: [citaId], references: [id])
 }
+model Configuracion {
+  id               Int @id @default(autoincrement())
+  clientesPorHora  Int
+
+  slots            SlotTrabajo[]
+}
+
+model SlotTrabajo {
+  id              Int @id @default(autoincrement())
+  hora            String
+
+  configuracionId Int
+  configuracion   Configuracion @relation(fields: [configuracionId], references: [id])
+}

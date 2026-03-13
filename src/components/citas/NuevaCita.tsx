@@ -1,13 +1,14 @@
 import Image from 'next/image'
 import { useState } from 'react'
 import DisabledDatePicker from '@/components/DatePicker/DisabledDatePicker'
+import TimePicker from '@/components/timePiker/TimePicker'
 
 type CitaForm = {
   cliente_id: string
   mascota_id: string
   fecha: string
-  hora_inicio: null
-  hora_fin?: null
+  hora_inicio: string | null
+  hora_fin: string | null
   estado: 'pendiente' | 'confirmado' | 'cancelado' | 'atendido'
   observaciones?: string
   estilo_corte?: string
@@ -63,7 +64,20 @@ export default function NuevaCita({clienteId, mascotas, onRefresh}: TNuevaCita) 
     setConfirmar(!confirmar)
   }
   const handleFechaChange = (fecha: string) => {
-    setForm(prev => ({ ...prev, fecha }))
+    setForm(prev => ({ ...prev, fecha, hora_inicio: null, hora_fin: null }))
+  }
+
+  const handleHoraChange = (hora: string) => {
+    // Calcular hora_fin sumando 1 hora
+    const [h, m] = hora.split(':').map(Number)
+    const finH = (h + 1).toString().padStart(2, '0')
+    const horaFin = `${finH}:${m.toString().padStart(2, '0')}`
+
+    setForm(prev => ({ 
+      ...prev, 
+      hora_inicio: hora,
+      hora_fin: horaFin 
+    }))
   }
 
   return (
@@ -100,6 +114,16 @@ export default function NuevaCita({clienteId, mascotas, onRefresh}: TNuevaCita) 
                 onChange={handleFechaChange}
               />
           </div>
+
+          {form.fecha && (
+            <div>
+              <TimePicker 
+                fecha={form.fecha} 
+                selectedHora={form.hora_inicio} 
+                onChange={handleHoraChange} 
+              />
+            </div>
+          )}
           <div
             className='flex flex-row rounded-2xl border border-amber-600 hover:bg-amber-500 px-2 py-2 justify-center'
             onClick={()=> handleConfirmar(confirmar)}

@@ -131,6 +131,13 @@ export default function AdminNav({ isSidebarOpen, setIsSidebarOpen,  }: AdminNav
                 onClick={() => { router.push('/admin/usuarios'); setIsSidebarOpen(false); }}
               />
             )}
+            {rolSesion === 'admin' && (
+              <SidebarItem
+                label="Configuracion"
+                icon="⚙️"
+                onClick={() => { router.push('/admin/configuracion'); setIsSidebarOpen(false); }}
+              />
+            )}
 
           </ul>
         </div>
