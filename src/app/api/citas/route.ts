@@ -13,6 +13,7 @@ function toSnakeCita(c: any, includeRelations = false) {
     observaciones: c.observaciones ?? null,
     estilo_corte: c.estiloCorte ?? null,
     created_at: c.createdAt,
+    comprobante: c.comprobante ?? null,
   }
   if (!includeRelations) return base
   return {
@@ -153,7 +154,6 @@ export async function GET(req: Request) {
       })
       return NextResponse.json(citas.map((c: any) => toSnakeCita(c)))
     }
-
     if (action === 'allbyCID') {
       const citas = await prisma.cita.findMany({
         where: { clienteId: id || undefined },
@@ -176,7 +176,6 @@ export async function GET(req: Request) {
         })),
       )
     }
-
     if (action === 'byid' && id) {
       const c = await prisma.cita.findUnique({
         where: { id },
@@ -192,7 +191,7 @@ export async function GET(req: Request) {
     const citas = await prisma.cita.findMany({
       include: {
         mascota: { select: { nombre: true } },
-        cliente: { select: { nombre: true, apellidoPaterno: true } },
+        cliente: { select: { nombre: true, apellidoPaterno: true, ci: true, telefono: true } },
         servicios: { select: { servicio: true, valor: true } },
       },
       orderBy: { createdAt: 'desc' },
@@ -201,7 +200,12 @@ export async function GET(req: Request) {
       citas.map((c: any) => ({
         ...toSnakeCita(c),
         mascota: { nombre: c.mascota?.nombre },
-        cliente: { nombre: c.cliente?.nombre, apellido_paterno: c.cliente?.apellidoPaterno ?? null },
+        cliente: { 
+          nombre: c.cliente?.nombre, 
+          apellido_paterno: c.cliente?.apellidoPaterno ?? null,
+          ci: c.cliente?.ci,
+          telefono: c.cliente?.telefono
+        },
         servicios: c.servicios?.map((s: any) => ({
           nombre: s.servicio, 
           precio: Number(s.valor),
@@ -215,19 +219,27 @@ export async function GET(req: Request) {
 
 export async function PATCH (req: Request) {
   const body = await req.json()
-  console.log('body: ',body)
   const { id, ...data } = body
   const dateOnly = data.fecha ? new Date(data.fecha) : undefined
   const isoDate = dateOnly ? dateOnly.toISOString().split('T')[0] : undefined
+  
+  // Función auxiliar para parsear la hora de forma segura
+  const parseTime = (timeStr: any) => {
+    if (!isoDate || typeof timeStr !== 'string') return undefined
+    const time = timeStr.substring(0, 5) // Asegura formato HH:mm
+    return new Date(`${isoDate}T${time}:00.000Z`)
+  }
+
   const dataFormat = {
     clienteId: data.cliente_id,
     mascotaId: data.mascota_id,
     fecha: dateOnly,
-    horaInicio: new Date(`${data.fecha}T${data.hora_inicio}`),
-    horaFin: new Date(`${data.fecha}T${data.hora_fin}`),  
+    horaInicio: parseTime(data.hora_inicio),
+    horaFin: parseTime(data.hora_fin),
     estado: data.estado,
     observaciones: data.observaciones,
     estiloCorte: data.estilo_corte,
+    comprobante: data.comprobante,
   }
   try {
     const cita = await prisma.cita.update({
@@ -236,25 +248,32 @@ export async function PATCH (req: Request) {
     })
     return NextResponse.json(toSnakeCita(cita))
   } catch (error: any) {
-    console.log('error: ',error)
+    console.error('Error en PATCH /api/citas:', error)
     return NextResponse.json({ error: error?.message || 'Error en el servidor' }, { status: 500 })
   }
 }
 export async function POST(req: Request) {
   const body = await req.json()
-  const { cliente_id, mascota_id, fecha, hora_inicio, hora_fin, estado, observaciones, estilo_corte } = body
+  const { cliente_id, mascota_id, fecha, hora_inicio, hora_fin, estado, observaciones, estilo_corte, comprobante } = body
   const dateOnly = new Date(fecha)
   const isoDate = dateOnly.toISOString().split('T')[0]
   
+  const parseTime = (timeStr: any) => {
+    if (!isoDate || typeof timeStr !== 'string') return undefined
+    const time = timeStr.substring(0, 5)
+    return new Date(`${isoDate}T${time}:00.000Z`)
+  }
+
   const dataFormat = {
     clienteId: cliente_id,
     mascotaId: mascota_id,
     fecha: dateOnly,
-    horaInicio: isoDate && typeof hora_inicio === 'string' ? new Date(`${isoDate}T${hora_inicio}:00.000Z`) : undefined,
-    horaFin: isoDate && typeof hora_fin === 'string' ? new Date(`${isoDate}T${hora_fin}:00.000Z`) : undefined,
+    horaInicio: parseTime(hora_inicio),
+    horaFin: parseTime(hora_fin),
     estado,
     observaciones,
     estiloCorte: estilo_corte,
+    comprobante: comprobante,
   }
 
   try {
@@ -263,6 +282,7 @@ export async function POST(req: Request) {
     })
     return NextResponse.json(toSnakeCita(cita))
   } catch (error: any) {
+    console.error('Error en POST /api/citas:', error)
     return NextResponse.json({ error: error?.message || 'Error en el servidor' }, { status: 500 })
   }
 }

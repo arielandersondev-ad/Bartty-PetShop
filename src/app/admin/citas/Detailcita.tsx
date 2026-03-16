@@ -4,6 +4,7 @@ import Servicio from '../servicio/page';
 import Cookies from 'js-cookie';
 import PagoForm from '../components/PagoForm';
 import { WhatsAppButton } from '../whatsappButton/WhatsAppButton';
+import TotemCortes from '@/app/totem/TotemCortes';
 
 export default function Detailcita({ citaDetail, onRefresh }: { citaDetail: Cita, onRefresh: () => void }) {
   const [citaUpdate, setCitaUpdate] = useState<Cita>(citaDetail);
@@ -11,6 +12,15 @@ export default function Detailcita({ citaDetail, onRefresh }: { citaDetail: Cita
   const sesion = JSON.parse(sessionCookie || '{}');
   const {rol, id} = sesion;
   const [totalCita, setTotalCita] = useState(0)
+  const [showTotem, setShowTotem] = useState(false)
+
+  const handleSelectCorte = (ruta: string) => {
+    setCitaUpdate({
+      ...citaUpdate,
+      estilo_corte: ruta
+    })
+    setShowTotem(false)
+  }
   const handlerChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setCitaUpdate({
@@ -62,7 +72,7 @@ export default function Detailcita({ citaDetail, onRefresh }: { citaDetail: Cita
         onSubmit={handlerSubmit}
       >
         {/* Información básica */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
           {/* Dueño */}
           <div className="flex flex-col">
@@ -103,55 +113,10 @@ export default function Detailcita({ citaDetail, onRefresh }: { citaDetail: Cita
             />
           </div>
 
-          {/* Estado */}
-          <div className="flex flex-col">
-            <label className="text-xs font-medium text-gray-500 mb-1">
-              Estado
-            </label>
-            <select
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D2691E]"
-              name="estado"
-              value={citaUpdate.estado}
-              onChange={handlerChange}
-            >
-              <option value="pendiente">Pendiente</option>
-              {(rol === 'admin' || rol === 'emp_recepcion') && (
-                <option value="confirmado">Confirmado</option>
-              )}
-              {(rol === 'admin' || rol === 'emp_servicio') && (
-                <option value="atendido">Atendido</option>
-              )}
-              {(rol === 'admin' || rol === 'emp_recepcion') && (
-                <option value="cancelado" className='bg-red-500 text-white'>Cancelado</option>
-              )}
-              {(rol === 'admin' || rol === 'emp_recepcion') && (
-                <option value="concluido">Concluido</option>
-              )}
-            </select>
-          </div>
+
         </div>
-
         {/* Detalles de cita */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-
-          {/* Corte */}
-          <div className="flex flex-col">
-            <label className="text-xs font-medium text-gray-500 mb-1">
-              Tipo de corte
-            </label>
-            <select
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D2691E]"
-              name="estilo_corte"
-              value={citaUpdate.tipo_corte || ''}
-              onChange={handlerChange}
-            >
-              <option value="">Seleccionar corte</option>
-              <option value="pelado">Pelado</option>
-              <option value="corte_normal">Corte Normal</option>
-              <option value="baño">Baño</option>
-              <option value="otros">Otros</option>
-            </select>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
           {/* Fecha */}
           <div className="flex flex-col">
@@ -195,20 +160,82 @@ export default function Detailcita({ citaDetail, onRefresh }: { citaDetail: Cita
           </div>
         </div>
 
-        {/* Observaciones */}
-        <div className="flex flex-col">
-          <label className="text-xs font-medium text-gray-500 mb-1">
-            Observaciones
-          </label>
-          <textarea
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D2691E]"
-            name="observaciones"
-            value={citaUpdate.observaciones}
-            onChange={handlerChange}
-            rows={1}
-          />
-        </div>
 
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          {/* Corte */}
+          <div className="flex flex-col">
+            <label className="text-xs font-medium text-gray-500 mb-1">
+              Corte deseado
+            </label>
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => setShowTotem(true)}
+                className="w-full px-3 py-2 text-sm border border-[#D2691E] text-[#8B4513] rounded-lg hover:bg-orange-50 transition-colors flex items-center justify-center gap-2 font-medium"
+              >
+                <span>🎨 Seleccionar estilo</span>
+              </button>
+              
+              {citaUpdate.estilo_corte && citaUpdate.estilo_corte.startsWith('/uploads/') ? (
+                <div className="relative w-full aspect-square rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                  <img 
+                    src={citaUpdate.estilo_corte} 
+                    alt="Corte seleccionado" 
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setCitaUpdate({...citaUpdate, estilo_corte: ''})}
+                    className="absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-md"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ):(<div className='text-sm font-bold text-red-500 text-center'>no hay corte seleccionado</div>)}
+            </div>
+          </div>
+          <div className='grid-cols-1'>
+            {/* Estado */}
+            <div className="flex flex-col">
+              <label className="text-xs font-medium text-gray-500 mb-1">
+                Estado
+              </label>
+              <select
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D2691E]"
+                name="estado"
+                value={citaUpdate.estado}
+                onChange={handlerChange}
+              >
+                <option value="pendiente">Pendiente</option>
+                {(rol === 'admin' || rol === 'emp_recepcion') && (
+                  <option value="confirmado">Confirmado</option>
+                )}
+                {(rol === 'admin' || rol === 'emp_servicio') && (
+                  <option value="atendido">Atendido</option>
+                )}
+                {(rol === 'admin' || rol === 'emp_recepcion') && (
+                  <option value="cancelado" className='bg-red-500 text-white'>Cancelado</option>
+                )}
+                {(rol === 'admin' || rol === 'emp_recepcion') && (
+                  <option value="concluido">Concluido</option>
+                )}
+              </select>
+            </div>
+            {/* Observaciones */}
+            <div className="flex flex-col">
+              <label className="text-xs font-medium text-gray-500 mb-1">
+                Observaciones
+              </label>
+              <textarea
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D2691E]"
+                name="observaciones"
+                value={citaUpdate.observaciones}
+                onChange={handlerChange}
+                rows={1}
+              />
+            </div>
+          </div>
+        </div>
         {/* Botón */}
         <div className="mt-2">
           <button
@@ -251,6 +278,13 @@ export default function Detailcita({ citaDetail, onRefresh }: { citaDetail: Cita
             saldo={totalCita}
           />  
         </>
+      )}
+
+      {showTotem && (
+        <TotemCortes 
+          onSelect={handleSelectCorte} 
+          onClose={() => setShowTotem(false)} 
+        />
       )}
     </div>
   )

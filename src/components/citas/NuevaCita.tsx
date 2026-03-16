@@ -12,6 +12,7 @@ type CitaForm = {
   estado: 'pendiente' | 'confirmado' | 'cancelado' | 'atendido'
   observaciones?: string
   estilo_corte?: string
+  comprobante?: string
 }
 type TNuevaCita = {
   clienteId: string,
@@ -36,6 +37,9 @@ export default function NuevaCita({clienteId, mascotas, onRefresh}: TNuevaCita) 
   const [ confirmar, setConfirmar ] = useState(false)
   const [ message, setMessage ] = useState('')
   const [ loading, setLoading ] = useState(false)
+  const [uploading, setUploading ] = useState(false)
+  const [comprobanteFile, setComprobanteFile] = useState<File | null>(null)
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -43,21 +47,69 @@ export default function NuevaCita({clienteId, mascotas, onRefresh}: TNuevaCita) 
     setForm(prev => ({ ...prev, [name]: value }))
   }
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setComprobanteFile(file)
+  }
+
+  const uploadComprobante = async (): Promise<string | null> => {
+    if (!comprobanteFile) return null;
+    
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', comprobanteFile);
+
+    try {
+      const res = await fetch('/api/citas/comprobante', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const data = await res.json();
+
+      if (data.success) {
+        return data.url;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error('Error en la petición de subida:', error);
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
+
+    let comprobanteUrl = form.comprobante;
+    if (comprobanteFile) {
+      const uploadedUrl = await uploadComprobante();
+      if (uploadedUrl) {
+        comprobanteUrl = uploadedUrl;
+      }
+    }
+
+    const finalFormData = { ...form, comprobante: comprobanteUrl };
+
     try {
       const res = await fetch('/api/citas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
-      if(res.ok)setMessage('Cita Solicitada Exitosamente')
-      onRefresh()
+        body: JSON.stringify(finalFormData),
+      });
+      
+      if(res.ok) {
+        setMessage('Cita Solicitada Exitosamente');
+      }
+      onRefresh();
     } catch (error) {
-      console.error('Error al registrar la cita: ', error)
-    }finally{
-      setLoading(false)
+      console.error('Error al registrar la cita: ', error);
+    } finally {
+      setLoading(false);
     }
   }
   function handleConfirmar (confirmar: boolean){
@@ -140,6 +192,18 @@ export default function NuevaCita({clienteId, mascotas, onRefresh}: TNuevaCita) 
                 className='mx-auto rounded-lg'
               /> 
               <p className='text-sm font-bold'>Es necesario que haga un adelanto para confirmar su cita y envie una captura del comprobante al siguiente Nuemero #12435241</p>
+              <div className="mt-4 p-4 border-2 border-dashed border-amber-300 rounded-xl flex flex-col items-center gap-2">
+                <label className="text-sm font-bold text-amber-700 cursor-pointer hover:text-amber-600">
+                  {comprobanteFile ? '📄 Archivo seleccionado: ' + comprobanteFile.name : '📁 Subir Comprobante (Opcional)'}
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/*,.pdf"
+                    onChange={handleFileUpload}
+                  />
+                </label>
+                {uploading && <p className="text-xs text-amber-600 animate-pulse">Subiendo archivo...</p>}
+              </div>
             </div>
           )}
           <p className='text-sm font-bold'>{message}</p>

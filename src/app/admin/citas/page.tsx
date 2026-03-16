@@ -89,12 +89,22 @@ export default function CitasAdmin() {
       onClick: (row) => detallesEspecificos(row.id),
       variant: 'amarillo',
       show: () => true,
+    },
+    {
+      label: 'Comprobante',
+      onClick: (row) => {
+        setDetail(row);
+        setModal('comprobante');
+      },
+      variant: 'azul',
+      show: (row) => !!row.comprobante,
     }
   ];
 
   async function fetchCitaDetail(id: string) {
     const res = await fetch(`/api/citas/?action=byid&id=${id}`);
     const data = await res.json();
+    console.log('datos detail: ',data)
     setDetail(Array.isArray(data) ? data[0] : data);
   }
 
@@ -170,6 +180,53 @@ export default function CitasAdmin() {
               onRefresh={fetchCitas}
             />
 
+          </div>
+        </div>
+      )}
+
+      {modal === 'comprobante' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border-2 border-[#D2691E] max-w-2xl w-full p-6 relative">
+            <button
+              className="absolute top-4 right-4 bg-gray-100 hover:bg-gray-200 text-gray-800 p-2 rounded-full transition-colors"
+              onClick={() => setModal('')}
+            >
+              <span className="text-xl">✕</span>
+            </button>
+            
+            <h3 className="text-xl font-bold text-[#8B4513] mb-4">Comprobante de Cita</h3>
+            
+            <div className="bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center min-h-[300px] border border-gray-200">
+              {detail.comprobante ? (
+                detail.comprobante.toLowerCase().endsWith('.pdf') ? (
+                  <iframe 
+                    src={detail.comprobante} 
+                    className="w-full h-[500px]" 
+                    title="Comprobante PDF"
+                  />
+                ) : (
+                  <img 
+                    src={detail.comprobante} 
+                    alt="Comprobante de pago" 
+                    className="max-w-full max-h-[70vh] object-contain"
+                  />
+                )
+              ) : (
+                <div className="flex flex-col items-center gap-3 text-gray-500">
+                  <span className="text-4xl">📁</span>
+                  <p className="font-medium">No hay un comprobante registrado</p>
+                </div>
+              )}
+            </div>
+            
+            <div className="mt-4 flex justify-end">
+              <button 
+                onClick={() => setModal('')}
+                className="bg-[#D2691E] hover:bg-[#8B4513] text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}

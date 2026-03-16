@@ -102,6 +102,7 @@ model Cita {
   estado       EstadoCita
   observaciones String?
   estiloCorte  String?
+  comprobante  String?
   createdAt    DateTime     @default(now())
 
   cliente  Cliente @relation(fields: [clienteId], references: [id])
@@ -214,4 +215,11 @@ model SlotTrabajo {
 
   configuracionId Int
   configuracion   Configuracion @relation(fields: [configuracionId], references: [id])
+}
+
+model Corte {
+  id          Int      @id @default(autoincrement())
+  ruta        String
+  descripcion String?
+  createdAt   DateTime @default(now())
 }
