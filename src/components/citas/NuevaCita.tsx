@@ -2,6 +2,7 @@ import Image from 'next/image'
 import { useState } from 'react'
 import DisabledDatePicker from '@/components/DatePicker/DisabledDatePicker'
 import TimePicker from '@/components/timePiker/TimePicker'
+import LocationPicker from './LocationPicker'
 
 type CitaForm = {
   cliente_id: string
@@ -39,6 +40,7 @@ export default function NuevaCita({clienteId, mascotas, onRefresh}: TNuevaCita) 
   const [ loading, setLoading ] = useState(false)
   const [uploading, setUploading ] = useState(false)
   const [comprobanteFile, setComprobanteFile] = useState<File | null>(null)
+  const [ map, setMap ] = useState('')
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -173,6 +175,28 @@ export default function NuevaCita({clienteId, mascotas, onRefresh}: TNuevaCita) 
                 fecha={form.fecha} 
                 selectedHora={form.hora_inicio} 
                 onChange={handleHoraChange} 
+              />
+            </div>
+          )}
+          <div>
+            <button
+              type="button"
+              onClick={() => setMap('map')}
+              className="text-sm font-bold text-amber-700 cursor-pointer hover:text-amber-600"
+            >
+              Recoger mi mascota
+            </button>
+          </div>
+          {map === 'map' && (
+            <div>
+              <LocationPicker 
+                onConfirm={(lat, lng) => {
+                  console.log("Ubicación confirmada:", {
+                    lat,
+                    lng,
+                  });
+                }}
+                onClose={() => setMap('')}
               />
             </div>
           )}

@@ -105,6 +105,10 @@ model Cita {
   comprobante  String?
   createdAt    DateTime     @default(now())
 
+  pickupLat     Float?
+  pickupLng     Float?
+  pickupAddress String?
+
   cliente  Cliente @relation(fields: [clienteId], references: [id])
   mascota  Mascota @relation(fields: [mascotaId], references: [id])
   pagos    Pago[]
