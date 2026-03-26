@@ -12,4 +12,6 @@ export interface Cita {
   cliente: {ci:string, telefono:string,nombre: string, apellido_paterno: string}
   servicios: []
   comprobante?: string | null
+  pickupLat?: number | null
+  pickupLng?: number | null
 }

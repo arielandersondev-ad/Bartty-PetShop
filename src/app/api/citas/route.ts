@@ -14,6 +14,8 @@ function toSnakeCita(c: any, includeRelations = false) {
     estilo_corte: c.estiloCorte ?? null,
     created_at: c.createdAt,
     comprobante: c.comprobante ?? null,
+    pickupLat: c.pickupLat ?? null,
+    pickupLng: c.pickupLng ?? null,
   }
   if (!includeRelations) return base
   return {
@@ -48,7 +50,7 @@ export async function GET(req: Request) {
     }
     if (action === 'fechasNoDisponibles') {
       const resCPH = await prisma.configuracion.findFirst()
-      const clientesporhora = await resCPH?.clientesPorHora
+      const clientesporhora = await resCPH?.clientesPorHora || 0
       const horasTrabajp = await prisma.slotTrabajo.findMany().then((res:any) => res.length-2)
       const fechasAgrupadas = await prisma.cita.groupBy({
         by: ['fecha'],
@@ -198,7 +200,7 @@ export async function GET(req: Request) {
     })
     return NextResponse.json(
       citas.map((c: any) => ({
-        ...toSnakeCita(c),
+        ...c,
         mascota: { nombre: c.mascota?.nombre },
         cliente: { 
           nombre: c.cliente?.nombre, 
@@ -263,7 +265,6 @@ export async function POST(req: Request) {
     const time = timeStr.substring(0, 5)
     return new Date(`${isoDate}T${time}:00.000Z`)
   }
-
   const dataFormat = {
     clienteId: cliente_id,
     mascotaId: mascota_id,
@@ -274,13 +275,32 @@ export async function POST(req: Request) {
     observaciones,
     estiloCorte: estilo_corte,
     comprobante: comprobante,
+    pickupLat: body.pickupLat,
+    pickupLng: body.pickupLng,
   }
 
   try {
     const cita = await prisma.cita.create({
       data: dataFormat,
-    })
-    return NextResponse.json(toSnakeCita(cita))
+      select: {
+        id: true,
+        clienteId: true,
+        mascotaId: true,
+        fecha: true,
+        horaInicio: true,
+        horaFin: true,
+        estado: true,
+        observaciones: true,
+        estiloCorte: true,
+        comprobante: true,
+        pickupLat: true,
+        pickupLng: true,
+      },
+    }).then((cita) => {(console.log(cita))})
+    return NextResponse.json({
+      message: 'Cita creada correctamente',
+      data: cita
+    }, { status: 201 })
   } catch (error: any) {
     console.error('Error en POST /api/citas:', error)
     return NextResponse.json({ error: error?.message || 'Error en el servidor' }, { status: 500 })

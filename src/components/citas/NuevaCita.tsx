@@ -41,6 +41,7 @@ export default function NuevaCita({clienteId, mascotas, onRefresh}: TNuevaCita) 
   const [uploading, setUploading ] = useState(false)
   const [comprobanteFile, setComprobanteFile] = useState<File | null>(null)
   const [ map, setMap ] = useState('')
+  const [pickupCoords, setPickupCoords] = useState<{lat: number, lng: number} | null>(null)
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -95,9 +96,10 @@ export default function NuevaCita({clienteId, mascotas, onRefresh}: TNuevaCita) 
       }
     }
 
-    const finalFormData = { ...form, comprobante: comprobanteUrl };
+    const finalFormData = { ...form, pickupLat: pickupCoords?.lat, pickupLng: pickupCoords?.lng, comprobante: comprobanteUrl };
 
     try {
+      console.log('data final: ',finalFormData);
       const res = await fetch('/api/citas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -191,6 +193,7 @@ export default function NuevaCita({clienteId, mascotas, onRefresh}: TNuevaCita) 
             <div>
               <LocationPicker 
                 onConfirm={(lat, lng) => {
+                  setPickupCoords({lat, lng})
                   console.log("Ubicación confirmada:", {
                     lat,
                     lng,

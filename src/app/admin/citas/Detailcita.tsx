@@ -7,6 +7,7 @@ import { WhatsAppButton } from '../whatsappButton/WhatsAppButton';
 import TotemCortes from '@/app/totem/TotemCortes';
 
 export default function Detailcita({ citaDetail, onRefresh }: { citaDetail: Cita, onRefresh: () => void }) {
+  console.log('dentro de detail: ',citaDetail)
   const [citaUpdate, setCitaUpdate] = useState<Cita>(citaDetail);
   const sessionCookie = Cookies.get('session');
   const sesion = JSON.parse(sessionCookie || '{}');
@@ -249,6 +250,39 @@ export default function Detailcita({ citaDetail, onRefresh }: { citaDetail: Cita
 
       <div className='border-2 border-[#8B4513]'></div>
       <div className='flex flex-col md:flex-row justify-center gap-3'>
+        {/* Recogida de mascota */}
+        <div className="flex flex-col gap-2 p-4 rounded-xl border border-gray-200 bg-white shadow-sm">
+          <label className="text-xs font-medium text-gray-500">
+            Recogida de mascota
+          </label>
+
+          <div className="flex items-center justify-between">
+            {/* Estado */}
+            <div
+              className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                citaDetail.pickupLat && citaDetail.pickupLng
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-gray-200 text-gray-600'
+              }`}
+            >
+              {citaDetail.pickupLat && citaDetail.pickupLng ? 'Habilitado' : 'No habilitado'}
+            </div>
+
+            {/* Botón */}
+            {citaDetail.pickupLat && citaDetail.pickupLng && (
+              <button
+                type="button"
+                onClick={() => {
+                  const url = `https://www.google.com/maps?q=${citaDetail.pickupLat},${citaDetail.pickupLng}`;
+                  window.open(url, '_blank');
+                }}
+                className="px-3 py-1 text-xs rounded-lg bg-[#D2691E] text-white hover:bg-[#b85c1a] transition-all"
+              >
+                Ver ubicación
+              </button>
+            )}
+          </div>
+        </div>
         <Servicio
           usuario_id={id}
           cita_id={citaDetail.id}
