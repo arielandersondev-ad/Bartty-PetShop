@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import {useRouter} from 'next/navigation'
 import Cookies from 'js-cookie';
+import SucursalSelector from '../admin/components/SucursalSelector';
 
 export default function Login() {
   const router = useRouter()
@@ -91,6 +92,9 @@ export default function Login() {
               required
             />
           </div>
+          <SucursalSelector
+            onChange={(value)=>{console.log(value)}}
+          />
           <button
             type="submit"
             disabled={loading}

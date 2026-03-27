@@ -41,6 +41,7 @@ enum TipoPagoCita {
 
 enum RolUsuario {
   admin
+  admin_global
   emp_servicio
   emp_recepcion
 }
@@ -50,13 +51,18 @@ enum RolUsuario {
 //////////////////////////////////////////////////
 
 model Categoria {
-  id        String    @id @default(uuid())
-  nombre    String    @unique
-  estado    Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id          String    @id @default(uuid())
+  nombre      String
+  estado      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  productos Producto[]
+  sucursalId  String?
+  sucursal    Sucursal?  @relation(fields: [sucursalId], references: [id])
+
+  productos   Producto[]
+
+  @@unique([sucursalId, nombre])
 }
 
 model Cliente {
@@ -109,6 +115,9 @@ model Cita {
   pickupLng     Float?
   pickupAddress String?
 
+  sucursalId String?
+  sucursal   Sucursal? @relation(fields: [sucursalId], references: [id])
+
   cliente  Cliente @relation(fields: [clienteId], references: [id])
   mascota  Mascota @relation(fields: [mascotaId], references: [id])
   pagos    Pago[]
@@ -140,6 +149,9 @@ model Producto {
   estado          Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  
+  sucursalId String?
+  sucursal   Sucursal? @relation(fields: [sucursalId], references: [id])
 
   categoria      Categoria      @relation(fields: [categoriaId], references: [id])
   unidadMedida   UnidadMedida   @relation(fields: [unidadMedidaId], references: [id])
@@ -153,6 +165,9 @@ model Inventario {
   cantidad   Int      @default(0)
   updatedAt  DateTime @updatedAt
 
+  sucursalId String?
+  sucursal   Sucursal? @relation(fields: [sucursalId], references: [id])
+
   producto Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
 }
 
@@ -164,6 +179,8 @@ model MovimientoInventario {
   referencia String?
   createdAt  DateTime       @default(now())
 
+  sucursalId String?
+  sucursal   Sucursal? @relation(fields: [sucursalId], references: [id])
   producto Producto @relation(fields: [productoId], references: [id])
 }
 
@@ -176,6 +193,8 @@ model UnidadMedida {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  sucursalId String?
+  sucursal   Sucursal? @relation(fields: [sucursalId], references: [id])
   productos Producto[]
 }
 
@@ -191,6 +210,10 @@ model Usuario {
   telefono       String?
   numeroReferido String?
   apellido       String?
+
+  // Sucursal
+  sucursalId String?
+  sucursal   Sucursal? @relation(fields: [sucursalId], references: [id])
 
   servicios ServicioCita[]
 }
@@ -210,6 +233,13 @@ model Configuracion {
   id               Int @id @default(autoincrement())
   clientesPorHora  Int
 
+  // por Sucursal
+  recojoHabilitado Boolean @default(false)
+
+  // Sucursal (clave para multi-sucursal)
+  sucursalId String?
+  sucursal   Sucursal? @relation(fields: [sucursalId], references: [id])
+
   slots            SlotTrabajo[]
 }
 
@@ -226,4 +256,28 @@ model Corte {
   ruta        String
   descripcion String?
   createdAt   DateTime @default(now())
+  sucursalId String?
+  sucursal   Sucursal? @relation(fields: [sucursalId], references: [id])
+}
+
+model Sucursal {
+  id        String   @id @default(uuid())
+  nombre    String
+  direccion String?
+  telefono  String?
+  lat       Float?
+  lng       Float?
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  // Relaciones
+  usuarios       Usuario[]
+  citas          Cita[]
+  configuraciones Configuracion[]
+  categorias         Categoria[]
+  unidadesMedida     UnidadMedida[]
+  productos          Producto[]
+  inventarios        Inventario[]
+  movimientos        MovimientoInventario[]
+  cortes             Corte[]
 }
