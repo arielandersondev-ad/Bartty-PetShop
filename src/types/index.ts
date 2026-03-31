@@ -120,4 +120,6 @@ export interface UsuarioForm {
   rol: 'admin' | 'emp_recepcion' | 'emp_servicio'
   activo: boolean
   created_at?: string
+  sucursalId?: string
+  sucursal?: string
 }

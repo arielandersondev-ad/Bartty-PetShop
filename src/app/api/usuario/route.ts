@@ -15,6 +15,8 @@ function toSnakeUsuario(u: any) {
     telefono: u.telefono ?? null,
     numero_referido: u.numeroReferido ?? null,
     apellido: u.apellido ?? null,
+    sucursalId: u.sucursalId ?? null,
+    sucursal: u.sucursal?.nombre ?? null,
   }
 }
 
@@ -23,11 +25,31 @@ export async function GET(req: Request) {
   const id = searchParams.get('id')
   try {
     if (id) {
-      const usuario = await prisma.usuario.findUnique({ where: { id } })
+      const usuario = await prisma.usuario.findUnique({ 
+        where: { id },
+        select: {
+          id: true,
+          nombre: true,
+          email: true,
+          rol: true,
+          activo: true,
+          createdAt: true,
+          ci: true,
+          telefono: true,
+          numeroReferido: true,
+          apellido: true,
+          sucursalId: true,
+          sucursal: true,
+        },
+      })
       if (!usuario) return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 })
       return NextResponse.json(toSnakeUsuario(usuario))
     }
-    const usuarios = await prisma.usuario.findMany()
+    const usuarios = await prisma.usuario.findMany({
+      include: {
+        sucursal: true,
+      }
+    })
     return NextResponse.json(usuarios.map(toSnakeUsuario))
   } catch (error: any) {
     return NextResponse.json({ error: error?.message || 'Error en el servidor' }, { status: 500 })
@@ -36,7 +58,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const body = await req.json()
-  const { email, password, nombre, apellido , rol, activo, ci, telefono, numero_referido, action } = body
+  const { email, password, nombre, apellido , rol, activo, ci, telefono, numero_referido, action, sucursal, } = body
   if (action === 'register') {
     // Validar que no exista usuario
     const existingUser = await prisma.usuario.findUnique({where: {email}})
@@ -44,7 +66,10 @@ export async function POST(req: Request) {
     if (existingUser) {
       return NextResponse.json({ error: 'Usuario ya existe' }, { status: 400 })
     }
-
+    if (!body.sucursalId) {
+      return NextResponse.json({ error: 'Sucursal requerida' }, { status: 400 })
+    }
+    const sucursalId = body.sucursalId
     // Hashear contraseña
     const hashed = bcrypt.hashSync(password, 10)
 
@@ -60,6 +85,7 @@ export async function POST(req: Request) {
         ci,
         telefono,
         numeroReferido: numero_referido,
+        sucursalId,
       }
     })
 
@@ -72,16 +98,17 @@ export async function POST(req: Request) {
 
   if (action === 'login') {
     const usuario = await prisma.usuario.findUnique({
-      where: { email },
+      where: { email, sucursalId:sucursal },
       select: {
         id: true,
         password: true,
         rol: true,
         email: true,
+        sucursal: true,
       }
     })
       if (!usuario) {
-        return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 401 })
+        return NextResponse.json({ error: 'Usuario no encontrado',usuario }, { status: 401 })
       }
       const valid = bcrypt.compareSync(password, usuario.password)
       if (!valid) {
@@ -111,6 +138,7 @@ export async function PATCH (req: Request) {
         numeroReferido: rest.numero_referido ?? undefined,
         apellido: rest.apellido ?? undefined,
         password: rest.password ? bcrypt.hashSync(rest.password, 10) : undefined,
+        sucursalId: rest.sucursalId ?? undefined,
       },
     })
     return NextResponse.json({ success: true, data_single: toSnakeUsuario(updated) })

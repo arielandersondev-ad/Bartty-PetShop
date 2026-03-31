@@ -32,6 +32,7 @@ export default function Agenda() {
       const res = await fetch(`/api/citas?action=allbyCID&id=${id}`)
       if (!res.ok) {console.log('error de fetch de citas por cliente')}
       const data = await res.json()
+      console.log('data de front: ',data)
       if (res.ok){setCitas(data)}
     } catch (error) {
       console.error("error en el fetch try", error)

@@ -4,24 +4,24 @@ import { DynamicTable, ColumnConfig, ActionButton } from '../components/DynamicT
 import { customStyles } from '@/styles/colors';
 import { Cita } from '@/types/citas';
 import Detailcita from './Detailcita';
+import Cookies from 'js-cookie';
 export default function CitasAdmin() {
 
   const [allcitas, setAllCitas] = useState<Cita[]>([])
   const [modal, setModal]  = useState("");
   const [detail, setDetail] = useState<Cita>({} as Cita);
-  function formatDateDMY(value?: string | null): string {
-    if (!value) return '-'
-
-    const parts = value.split('-')
-    if (parts.length !== 3) return '-'
-
-    const [year, month, day] = parts
-    return `${day}-${month}-${year}`
-  }
+  const session = JSON.parse(Cookies.get('session') || '{}');
+  const {id} = session;
+  const [sucursalSesion,setSucursalSesion] = useState('')
   function formatServicios(servicios?: any[]) {
     const serviciosFormatted = servicios?.map((s: any) => s.nombre).join(', ')
     return serviciosFormatted
   }
+  function formatDate(dateTime: string) {
+  const [date] = dateTime.split('T')
+  const parts = date.split('-')
+  return `${parts[2]}/${parts[1]}/${parts[0]}`
+}
   const columns: ColumnConfig<Cita>[] = [
     {
       key: 'fecha',
@@ -29,7 +29,7 @@ export default function CitasAdmin() {
       type: 'date',
       sortable: true,
       searchable: true,
-      render: (value, row) => formatDateDMY(value),
+      render: (value, row) => formatDate(value),
     },
     {
       key: 'hora_inicio',
@@ -104,15 +104,15 @@ export default function CitasAdmin() {
   async function fetchCitaDetail(id: string) {
     const res = await fetch(`/api/citas/?action=byid&id=${id}`);
     const data = await res.json();
-    console.log('datos detail: ',data)
+    //console.log('datos detail: ',data)
     setDetail(Array.isArray(data) ? data[0] : data);
   }
 
-  async function fetchCitas() {
+  async function fetchCitas(sucursalId?: any) {
     try {
-      const res = await fetch('/api/citas');
+      const res = await fetch(`/api/citas/?action=by_sucursal&id=${sucursalSesion||sucursalId}`);
       const data = await res.json();
-      console.log('datos detail: ',data)
+      //console.log('datos: ',data)
       setAllCitas(data);
     } catch (error) {
       console.error('Error al obtener las citas:', error);
@@ -124,10 +124,16 @@ export default function CitasAdmin() {
     await fetchCitaDetail(id);
     setModal('detalles');
   }
-
+  const fetchSucursalId = async () => {
+    const res = await fetch(`/api/usuario/?id=${id}`);
+    const data = await res.json();
+    setSucursalSesion(data.sucursalId);
+    return data.sucursalId;
+  }
   useEffect(() => {
-    const loadCitas = async () => {await fetchCitas();}
-    loadCitas();
+    fetchSucursalId().then((sucursalId)=>{
+      fetchCitas(sucursalId);
+    })
   }, [])
 
   return (

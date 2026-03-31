@@ -11,7 +11,8 @@ export default function Login() {
     email: '',
     password: '',
     nombre: '',
-    rol: ''
+    rol: '',
+    sucursal: ''
   })
   const [loading, setLoading] = useState(false)
   const [mensaje, setMensaje] = useState('')
@@ -26,7 +27,14 @@ export default function Login() {
     e.preventDefault()
     setLoading(true)
     setMensaje('')
-
+    if(form.sucursal.length < 1){
+      setMensaje('Selecciona una sucursal')
+      setTimeout(()=>{
+        setMensaje('')
+        setLoading(false)
+      }, 3000)
+      return
+    }
     try {
       const res = await fetch('/api/usuario', {
         method: 'POST',
@@ -93,7 +101,7 @@ export default function Login() {
             />
           </div>
           <SucursalSelector
-            onChange={(value)=>{console.log(value)}}
+            onChange={(value)=>{setForm({...form, sucursal: value})}}
           />
           <button
             type="submit"
@@ -102,9 +110,9 @@ export default function Login() {
           >
             {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
           </button>
+          {mensaje && <p className="mt-4 text-center text-red-500">{mensaje}</p>}
         </form>
       </div>
-      {mensaje && <p className="mt-4 text-center text-red-500">{mensaje}</p>}
     </div>
   )
 }
@@ -192,8 +200,8 @@ export function LoginClinte({onCurrentView}: LoginClinteType){
           >
             {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
           </button>
+          {mensaje && <p className="mt-4 text-center text-green-500">{mensaje}</p>}
         </form>
-        {mensaje && <p className="mt-4 text-center text-green-500">{mensaje}</p>}
       </div>
     </div>
   )

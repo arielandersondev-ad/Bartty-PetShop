@@ -14,4 +14,6 @@ export interface Cita {
   comprobante?: string | null
   pickupLat?: number | null
   pickupLng?: number | null
+  sucursalId?: string
+  sucursal?: string
 }

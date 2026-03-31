@@ -20,28 +20,84 @@ export default function Usuarios() {
     activo: 'true',
     password:'',
     rol: '',
+    sucursalId: '',
+  }
+  interface sucursalSelect {
+    id: string,
+    nombre: string,
   }
   const [form, setForm] = useState(dataExample)
   const [usuarios, setUsuarios] = useState<UsuarioForm[]>([])
+  const [sucursales, setSucursales] = useState<sucursalSelect[]>([])
   const [edit, setEdit] = useState(false)
 
   const [loading, setLoading] = useState(false)
   const [mensaje, setMensaje] = useState('')
   const columns: ColumnConfig<UsuarioForm>[] = [
-    { key: 'ci', label: 'CI', type: 'text', sortable: true },
-    { key: 'nombre', label: 'Nombre', type: 'text', sortable: true, searchable: true },
-    { key: 'apellido', label: 'Apellido', type: 'text', sortable: true, searchable: true },
-    { key: 'email', label: 'Email', type: 'text', sortable: true, searchable: true },
-    { key: 'password', label: 'Contraseña', type: 'text', sortable: false, width: '300px' },
-    { key: 'rol', label: 'Rol', type: 'text', sortable: true },
-    { key: 'activo', label: 'Estado', type: 'status', sortable: true,
+    { 
+      key: 'ci', 
+      label: 'CI', 
+      type: 'text', 
+      sortable: true 
+    },
+    { 
+      key: 'nombre', 
+      label: 'Nombre', 
+      type: 'text', 
+      sortable: true, searchable: true 
+    },
+    { 
+      key: 'apellido', 
+      label: 'Apellido', 
+      type: 'text', 
+      sortable: true, searchable: true 
+    },
+    { 
+      key: 'email', 
+      label: 'Email', 
+      type: 'text', 
+      sortable: true, searchable: true 
+    },
+    { 
+      key: 'password', 
+      label: 'Contraseña', 
+      type: 'text', 
+      sortable: false, width: '300px' 
+    },
+    { 
+      key: 'rol', 
+      label: 'Rol', 
+      type: 'text', 
+      sortable: true 
+    },
+    { 
+      key: 'sucursal', 
+      label: 'Sucursal', 
+      type: 'text', 
+      sortable: true 
+    },
+    { 
+      key: 'activo', 
+      label: 'Estado', 
+      type: 'status', 
+      sortable: true,
       statusOptions: [
         { value: 'true', label: 'Activo', color: '#10b981' },
         { value: 'false', label: 'Inactivo', color: '#ef4444' }
       ]
      },
-    { key: 'telefono', label: 'Teléfono', type: 'text', sortable: true },
-    { key: 'numero_referido', label: 'Referido', type: 'text', sortable: true }
+    { 
+      key: 'telefono', 
+      label: 'Teléfono', 
+      type: 'text', 
+      sortable: true 
+    },
+    { 
+      key: 'numero_referido', 
+      label: 'Referido', 
+      type: 'text', 
+      sortable: true 
+    }
   ]
   const actions: ActionButton<UsuarioForm>[] = [
     {
@@ -91,6 +147,7 @@ export default function Usuarios() {
       activo: usuario.activo ? 'true' : 'false',
       telefono: usuario.telefono || '',
       numero_referido: usuario.numero_referido || '',
+      sucursalId: usuario.sucursalId || '',
     })
 
   }
@@ -141,6 +198,16 @@ export default function Usuarios() {
       console.error('Error fetching usuarios:', error)
     }
   }
+  async function fetchSucursales() {
+    try {
+      const res = await fetch('/api/sucursal')
+      const data = await res.json()
+      setSucursales(data.sucursales || [])
+      console.log('sucursal: ',data)
+    } catch (error) {
+      console.error('Error fetching sucursales:', error)
+    }
+  }
 
   useEffect(() => {
     if (!sesionCookie) {
@@ -151,6 +218,8 @@ export default function Usuarios() {
     }
     const loadUsuarios = async () => {await fetchUsuarios();}
     loadUsuarios();
+    const loadSucursales = async () => {await fetchSucursales();}
+    loadSucursales();
   },[sesionCookie, router,rol]);
   
 return (
@@ -277,6 +346,23 @@ return (
               >
                 <option className="text-black" value="true">Activo</option>
                 <option className="text-black" value="false">Inactivo</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-black">Sucursal</label>
+            <div className="rounded-2xl border-2 border-[#D2691E] p-2">
+              <select 
+                name="sucursalId" 
+                id="sucursalId" 
+                className="outline-none w-full"
+                onChange={handleChange}
+                value={form.sucursalId}
+              >
+                <option key="0" className="text-black" value="">Seleccionar Sucursal</option>
+                {sucursales?.map((sucursal) => (
+                  <option key={sucursal.id} className="text-black" value={sucursal.id}>{sucursal.nombre}</option> 
+                )) || null}
               </select>
             </div>
           </div>

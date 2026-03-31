@@ -31,6 +31,7 @@ export async function GET(req: Request) {
   const action = searchParams.get('action')
   const id = searchParams.get('id')
   const date = searchParams.get('fecha')
+  const sucursalId = searchParams.get('sucursalId')
 
   try {
 
@@ -49,13 +50,15 @@ export async function GET(req: Request) {
       return NextResponse.json(citas.map((c: any) => toSnakeCita(c)))
     }
     if (action === 'fechasNoDisponibles') {
+
       const resCPH = await prisma.configuracion.findFirst()
       const clientesporhora = await resCPH?.clientesPorHora || 0
       const horasTrabajp = await prisma.slotTrabajo.findMany().then((res:any) => res.length-2)
       const fechasAgrupadas = await prisma.cita.groupBy({
         by: ['fecha'],
         where: {
-          estado: 'confirmado'
+          estado: 'confirmado',
+          sucursalId
         },
         _count: {
           fecha: true
@@ -162,6 +165,7 @@ export async function GET(req: Request) {
         include: {
           mascota: { select: { nombre: true } },
           cliente: { select: { nombre: true, apellidoPaterno: true } },
+          sucursal: { select: { nombre: true } },
         },
         orderBy: { createdAt: 'desc' },
       })
@@ -173,6 +177,8 @@ export async function GET(req: Request) {
           estado: c.estado,
           observaciones: c.observaciones,
           id: c.id,
+          sucursal_id: c.sucursalId,
+          sucursal: c.sucursal?.nombre,
           mascota: { nombre: c.mascota?.nombre },
           cliente: { nombre: c.cliente?.nombre, apellido_paterno: c.cliente?.apellidoPaterno ?? null },
         })),
@@ -188,6 +194,34 @@ export async function GET(req: Request) {
       })
       if (!c) return NextResponse.json({ error: 'Cita no encontrada' }, { status: 404 })
       return NextResponse.json(toSnakeCita(c, true))
+    }
+    if(action==='by_sucursal'&&id){
+      if(!id) return NextResponse.json({ error: 'ID requerido',id }, { status: 400 })
+      const citas = await prisma.cita.findMany({
+        where: { sucursalId: id || undefined },
+        include: {
+          mascota: { select: { nombre: true } },
+          cliente: { select: { nombre: true, apellidoPaterno: true, ci: true, telefono: true } },
+          servicios: { select: { servicio: true, valor: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+      return NextResponse.json(
+        citas.map((c: any) => ({
+          ...c,
+          mascota: { nombre: c.mascota?.nombre },
+          cliente: { 
+            nombre: c.cliente?.nombre, 
+            apellido_paterno: c.cliente?.apellidoPaterno ?? null,
+            ci: c.cliente?.ci,
+            telefono: c.cliente?.telefono
+          },
+          servicios: c.servicios?.map((s: any) => ({
+            nombre: s.servicio, 
+            precio: Number(s.valor),
+          })),
+        })),
+      )
     }
 
     const citas = await prisma.cita.findMany({
@@ -256,10 +290,10 @@ export async function PATCH (req: Request) {
 }
 export async function POST(req: Request) {
   const body = await req.json()
-  const { cliente_id, mascota_id, fecha, hora_inicio, hora_fin, estado, observaciones, estilo_corte, comprobante } = body
+  const { cliente_id, mascota_id, fecha, hora_inicio, hora_fin, estado, observaciones, estilo_corte, comprobante, sucursalId } = body
   const dateOnly = new Date(fecha)
   const isoDate = dateOnly.toISOString().split('T')[0]
-  
+  if (!sucursalId) return NextResponse.json({ error: 'Sucursal requerida' }, { status: 400 })
   const parseTime = (timeStr: any) => {
     if (!isoDate || typeof timeStr !== 'string') return undefined
     const time = timeStr.substring(0, 5)
@@ -277,6 +311,7 @@ export async function POST(req: Request) {
     comprobante: comprobante,
     pickupLat: body.pickupLat,
     pickupLng: body.pickupLng,
+    sucursalId,
   }
 
   try {
@@ -295,6 +330,7 @@ export async function POST(req: Request) {
         comprobante: true,
         pickupLat: true,
         pickupLng: true,
+        sucursalId: true,
       },
     }).then((cita) => {(console.log(cita))})
     return NextResponse.json({

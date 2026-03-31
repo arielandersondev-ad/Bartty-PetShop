@@ -7,7 +7,7 @@ import { WhatsAppButton } from '../whatsappButton/WhatsAppButton';
 import TotemCortes from '@/app/totem/TotemCortes';
 
 export default function Detailcita({ citaDetail, onRefresh }: { citaDetail: Cita, onRefresh: () => void }) {
-  console.log('dentro de detail: ',citaDetail)
+  //console.log('dentro de detail: ',citaDetail)
   const [citaUpdate, setCitaUpdate] = useState<Cita>(citaDetail);
   const sessionCookie = Cookies.get('session');
   const sesion = JSON.parse(sessionCookie || '{}');
