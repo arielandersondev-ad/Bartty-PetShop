@@ -18,7 +18,8 @@ export type UnidadMedida = {
 export type Inventario = { 
     id?: string;
     cantidad: number; 
-    productoId: string; 
+    productoId: string;
+    sucursalId: string;
     updatedAt: string; 
 }
 
@@ -60,4 +61,14 @@ export type InventarioProducto = {
     productoId: string; 
     updatedAt: string; 
     producto: ProductoCategoriaMedida;
+}
+export type Sucursal = {
+    id: string;
+    activo: boolean;
+    direccion: string;
+    lat: number;
+    lng: number;
+    nombre: string;
+    telefono: string;
+    createdAt: string;
 }

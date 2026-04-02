@@ -17,7 +17,6 @@ export default function SucursalSelector({onChange}: {onChange: (value: string) 
     if (sesion.rol){
       const res = await fetch(`/api/usuario?id=${sesion.id}`);
       const data = await res.json();
-      console.log('sucursales?: ',data)
       setCurrentSucursal({nombre:data.sucursal,id:data.sucursalId});
     }
   }

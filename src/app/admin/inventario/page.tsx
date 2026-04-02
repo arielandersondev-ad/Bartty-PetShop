@@ -7,9 +7,15 @@ import UnidadMedidaModal from './UnidadMedidaModal';
 import ProductoModal from './ProductoModal';
 import InventarioModal from './InventarioModal';
 import { InventarioProducto } from './type';
+import Cookies from 'js-cookie';
 
 
 export default function InventarioAdmin() {
+
+  const sessionCookie = Cookies.get('session');
+  const session = JSON.parse(sessionCookie || '{}');
+  const sucursalId = session.sucursalId
+
   const [modal, setModal] = useState<string>("");
   const [productos, setProductos] = useState<InventarioProducto[]>([]);
 
@@ -17,9 +23,13 @@ export default function InventarioAdmin() {
   const [selectedId, setSelectedId] = useState<string>("");
 
   const [idInventarioForDetails, setIdInventarioForDetails] = useState<string>("");
+  async function loadUser() {
+    const res = await fetch(`/api/usuario?id=${session.id}`)
+    const data = await res.json()
+    return data.sucursalId || ''
+  }
 
   const handleSendDetaills = async (value: string) => {
-    console.log("value: ",value)
     setIdInventarioForDetails(value);
     setModal('inventario');
   }
@@ -34,7 +44,7 @@ export default function InventarioAdmin() {
       if (res.ok) {
         setModal('');
         setSelectedId('');
-        refreshProductos();
+        refreshProductos(sucursalId);
       }
     } catch (error) {
       console.error('Error al eliminar el producto:', error);
@@ -132,13 +142,17 @@ export default function InventarioAdmin() {
     },
   ];
 
-  const refreshProductos = async () => {
-    const res = await fetch('/api/inventario?action=getAllDataInventario')
+  const refreshProductos = async (sucursalId: string) => {
+    const res = await fetch(`/api/inventario?action=getAllInvBySucursalId&sucursalId=${sucursalId}`)
     const data = await res.json()
     if (res.ok) setProductos(data.data)
   }
   useEffect(() => {
-    refreshProductos()
+    async function loadProductos() {
+      const sucursalId = await loadUser()
+      refreshProductos(sucursalId)
+    }
+    loadProductos()
   }, [])
   const valorTotalInventariadoVenta = productos.reduce((total, producto) => total + producto.producto.precioVenta * producto.cantidad, 0).toFixed(2)
   const valorTotalInventariadoCompra = productos.reduce((total, producto) => total + producto.producto.precioCompra * producto.cantidad, 0).toFixed(2)
@@ -298,7 +312,7 @@ export default function InventarioAdmin() {
       {modal === "inventario" && (
         <InventarioModal
           onClose={() => setModal("")}
-          onRefresh={() => refreshProductos()}
+          onRefresh={async () => {const a = await loadUser(); refreshProductos(a || '')}}
           inventario= {idInventarioForDetails}
         />
       )}

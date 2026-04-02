@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Inventario, Producto } from "./type";
+import SucursalSelector from "../components/SucursalSelector";
 
 export default function InventarioModal({ onClose, onRefresh, inventario }: {onClose?: () => void, onRefresh?: () => void, inventario?: string}) {
   
   const [selectedId, setSelectedId] = useState<string | null>(inventario || null)
   const [ inventarios, setInventarios] = useState<Inventario[]>([])
-  const [form, setForm] = useState<Inventario>({ cantidad: 0, productoId: "", updatedAt: "" })
+  const [form, setForm] = useState<Inventario>({ sucursalId: "", cantidad: 0, productoId: "", updatedAt: "" })
   const [loading, setLoading] = useState(false)
   const [mensaje, setMensaje] = useState("")
   const [productos, setProductos] = useState<Producto[]>([])
- 
+  
   async function inventarioId(id : string) {
     const res = await fetch(`/api/inventario?action=getInventarioId&id=${id}`)
     const data = await res.json()
@@ -34,7 +35,7 @@ export default function InventarioModal({ onClose, onRefresh, inventario }: {onC
 
   const onSelect = (i: Inventario) => {
     setSelectedId(i.id || i.productoId)
-    setForm({ cantidad: i.cantidad, productoId: i.productoId, updatedAt: i.updatedAt })
+    setForm({ sucursalId: i.sucursalId, cantidad: i.cantidad, productoId: i.productoId, updatedAt: i.updatedAt })
     setMensaje("")
   }
 
@@ -47,13 +48,13 @@ export default function InventarioModal({ onClose, onRefresh, inventario }: {onC
         const res = await fetch("/api/inventario", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "createInventario", cantidad: form.cantidad, productoId: form.productoId })
+          body: JSON.stringify({ action: "createInventario",sucursalId: form.sucursalId, cantidad: form.cantidad, productoId: form.productoId })
         })
         const data = await res.json()
         if (!res.ok) setMensaje(data.error || "Error al crear inventario")
         else {
           setMensaje("Inventario creado")
-          setForm({ cantidad: 0, productoId: "", updatedAt: "" })
+          setForm({ sucursalId: "", cantidad: 0, productoId: "", updatedAt: "" })
           onRefresh?.()
         }
       } else {
@@ -90,7 +91,7 @@ export default function InventarioModal({ onClose, onRefresh, inventario }: {onC
       else {
         setMensaje("Inventario eliminado")
         setSelectedId(null)
-        setForm({ cantidad: 0, productoId: "", updatedAt: "" })
+        setForm({ sucursalId: "", cantidad: 0, productoId: "", updatedAt: "" })
         refreshList()
       }
     } catch {
@@ -131,7 +132,12 @@ export default function InventarioModal({ onClose, onRefresh, inventario }: {onC
           </div>
           <div>
             <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
+              <div>
+                <SucursalSelector
+                  onChange={(value) => setForm(prev => ({ ...prev, sucursalId: value }))}
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700">Producto</label>
                 <select
                   id="productoId"
@@ -163,7 +169,7 @@ export default function InventarioModal({ onClose, onRefresh, inventario }: {onC
                   type="button"
                   onClick={() => {
                     setSelectedId(null)
-                    setForm({ cantidad: 0, productoId: "", updatedAt: "" })
+                    setForm({ sucursalId: "", cantidad: 0, productoId: "", updatedAt: "" })
                     setMensaje("")
                   }}
                   className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
