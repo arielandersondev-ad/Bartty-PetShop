@@ -4,28 +4,42 @@ interface TimePickerProps {
   fecha: string
   selectedHora: string | null
   onChange: (hora: string) => void
+  sucursalId?: string
 }
 
-export default function TimePicker({ fecha, selectedHora, onChange }: TimePickerProps) {
+export default function TimePicker({ fecha, selectedHora, onChange, sucursalId }: TimePickerProps) {
   const [busyHours, setBusyHours] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
+  const [availableSlots, setAvailableSlots] = useState([])
 
-  const availableSlots = [
-    '08:00', '09:00', '10:00', '11:00', '12:00', 
-    '14:00', '15:00', '16:00', '17:00', '18:00'
-  ]
-
+  async function loadAvailableSlots (){
+    if (!sucursalId) return
+    try {
+      const res = await fetch(`/api/configuracion/slot?sucursalId=${sucursalId}`)
+      const data = await res.json()
+      if (data) {
+        function guardarHoras(data:any, setAvailableSlots:any) {
+          const horas = data
+            .map((item:any) => item.hora)
+            .sort((a:any, b:any) => a.localeCompare(b));
+          setAvailableSlots(horas);
+        }
+        guardarHoras(data, setAvailableSlots)
+      }
+    } catch (error) {
+      
+    }
+  }
   useEffect(() => {
     if (!fecha) return
 
     const fetchBusyHours = async () => {
       setLoading(true)
       try {
-        const res = await fetch(`/api/citas?action=citasConfirmadasporFecha&fecha=${fecha}`)
+        const res = await fetch(`/api/citas?action=HorasNoDisponiblesbyDate&fecha=${fecha}&sucursalId=${sucursalId}`)
         const data = await res.json()
         if (data.success) {
-          // Guardamos las horas de inicio ocupadas
-          setBusyHours(data.hora_inicio || [])
+          setBusyHours(data.data || [])
         }
       } catch (error) {
         console.error('Error fetching busy hours:', error)
@@ -35,7 +49,8 @@ export default function TimePicker({ fecha, selectedHora, onChange }: TimePicker
     }
 
     fetchBusyHours()
-  }, [fecha])
+    loadAvailableSlots()
+  }, [fecha, sucursalId])
 
   if (!fecha) {
     return <p className="text-sm text-gray-500 italic">Selecciona una fecha primero</p>

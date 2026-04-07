@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import DisabledDatePicker from '@/components/DatePicker/DisabledDatePicker'
 import TimePicker from '@/components/timePiker/TimePicker'
 import LocationPicker from './LocationPicker'
@@ -183,6 +183,7 @@ export default function NuevaCita({clienteId, mascotas, onRefresh}: TNuevaCita) 
               <DisabledDatePicker
                 value={form.fecha}
                 onChange={handleFechaChange}
+                sucursalId={form.sucursalId || ''}
               />
             )}
           </div>
@@ -193,7 +194,8 @@ export default function NuevaCita({clienteId, mascotas, onRefresh}: TNuevaCita) 
               <TimePicker 
                 fecha={form.fecha} 
                 selectedHora={form.hora_inicio} 
-                onChange={handleHoraChange} 
+                onChange={handleHoraChange}
+                sucursalId={form.sucursalId}
               />
               )}
             </div>

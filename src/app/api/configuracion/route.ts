@@ -5,6 +5,8 @@ import { success } from "zod"
 export async function GET(req : Request) {
   const {searchParams} = new URL(req.url)
   const action = searchParams.get('action')
+  const sucursalId = searchParams.get('sucursalId')
+  
   if(action === 'all'){
     try {
       const res = await prisma.configuracion.findMany({
@@ -16,9 +18,18 @@ export async function GET(req : Request) {
       return NextResponse.json({status: 500})
     }
   }
-    const  slotTrabajo = await prisma.slotTrabajo.findMany()
-    const config = await prisma.configuracion.findFirst()
-    return NextResponse.json({config, slotTrabajo})
+  
+  // Filtrar por sucursalId si se proporciona
+  const whereConfig = sucursalId ? { sucursalId } : {}
+  const whereSlot = sucursalId ? { sucursalId } : {}
+  
+  const slotTrabajo = await prisma.slotTrabajo.findMany({
+    where: whereSlot
+  })
+  const config = await prisma.configuracion.findFirst({
+    where: whereConfig
+  })
+  return NextResponse.json({config, slotTrabajo})
 }
 export async function POST(req: Request) {
   const body = await req.json()
@@ -44,9 +55,11 @@ export async function POST(req: Request) {
     const config = await prisma.configuracion.create({
       data: {
         clientesPorHora: body.clientesPorHora,
+        sucursalId: body.sucursalId,
         slots: {
           create: body.slots.map((hora: string) => ({
-            hora
+            hora,
+            sucursalId: body.sucursalId
           }))
         }
       },

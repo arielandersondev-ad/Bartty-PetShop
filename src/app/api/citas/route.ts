@@ -30,11 +30,57 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const action = searchParams.get('action')
   const id = searchParams.get('id')
-  const date = searchParams.get('fecha')
   const sucursalId = searchParams.get('sucursalId')
 
   try {
-
+    if (action === 'test'){
+      const resCPH = await prisma.configuracion.findFirst({ 
+        select: { clientesPorHora: true }, 
+        where: { sucursalId:'10001' } 
+      })
+      const horasTrabajp = await prisma.slotTrabajo.findMany({
+        where: {
+          sucursalId:'10002'
+        }
+      }).then((res:any) => res.length)
+      const fechasAgrupadas = await prisma.cita.groupBy({
+        by: ['fecha'],
+        where: {
+          estado: 'confirmado',
+          sucursalId:'10002'
+        },
+        _count: {
+          fecha: true
+        }
+      })
+      const fechas = await prisma.cita.findMany({
+        select:{
+          fecha: true,
+          sucursalId: true,
+          estado: true,
+        },
+        where: {
+          estado: 'confirmado',
+          sucursalId:'10002'
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+      const allfechasCitas = await prisma.cita.findMany({
+        select:{
+          fecha: true,
+          sucursalId: true,
+          estado: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+      return NextResponse.json({
+        /* fechasAgrupadas,
+        fechas,
+        allfechasCitas,
+        resCPH, */
+        horasTrabajp
+      })
+    }
     if (action === 'citasConfirmadas') {
       const citas = await prisma.cita.findMany({
         select:{
@@ -50,10 +96,20 @@ export async function GET(req: Request) {
       return NextResponse.json(citas.map((c: any) => toSnakeCita(c)))
     }
     if (action === 'fechasNoDisponibles') {
-
-      const resCPH = await prisma.configuracion.findFirst()
-      const clientesporhora = await resCPH?.clientesPorHora || 0
-      const horasTrabajp = await prisma.slotTrabajo.findMany().then((res:any) => res.length-2)
+      if (!sucursalId) return NextResponse.json({
+        success: false,
+        message: 'SucursalId es requerido'
+      })
+      const resCPH = await prisma.configuracion.findFirst({ 
+        select: { clientesPorHora: true }, 
+        where: { sucursalId } 
+      })
+      const clientesporhora = resCPH?.clientesPorHora || 2
+      const horasTrabajp = await prisma.slotTrabajo.findMany({
+        where: {
+          sucursalId
+        }
+      }).then((res:any) => res.length)
       const fechasAgrupadas = await prisma.cita.groupBy({
         by: ['fecha'],
         where: {
@@ -64,7 +120,6 @@ export async function GET(req: Request) {
           fecha: true
         }
       })
-      console.log('deboug de fechas : ',fechasAgrupadas)
       const fechasNoDisponibles = fechasAgrupadas
         .filter((f:any) => f._count.fecha >= clientesporhora*horasTrabajp)
         .map((f:any) => f.fecha.toISOString().split('T')[0])
@@ -76,19 +131,26 @@ export async function GET(req: Request) {
       })
     }
     if (action === 'HorasNoDisponiblesbyDate') {
+      const date = searchParams.get('fecha')
+      const clienteHora = await prisma.configuracion.findFirst({ where: { sucursalId } })
+      const clientesporhora = clienteHora?.clientesPorHora || 2
       const fechasAgrupadas = await prisma.cita.groupBy({
         by: ['horaInicio'],
         where: {
-          estado: 'confirmado'
+          estado: 'confirmado',
+          fecha: date ? new Date(date) : undefined,
+          sucursalId,
         },
         _count: {
           horaInicio: true
         }
       })
-      console.log('deboug de fechas : ',fechasAgrupadas)
       const horasNoDisponibles = fechasAgrupadas
-        .filter((f:any) => f._count.horaInicio >= 4)
-        .map((f:any) => f.horaInicio?.toISOString().split('T')[1].split('.')[0] || '')
+        .filter((f:any) => f._count.horaInicio >= clientesporhora)
+        .map((f:any) => {
+          const horaCompleta = f.horaInicio?.toISOString().split('T')[1].split('.')[0] || ''
+          return horaCompleta.substring(0,5)
+        })
 
       return NextResponse.json({
         success: true,
@@ -104,8 +166,10 @@ export async function GET(req: Request) {
       return NextResponse.json(citas.map((c: any) => toSnakeCita(c)))
     }
     if (action === 'citasConfirmadasporFecha') {
-      const resCPH = await prisma.configuracion.findFirst()
-      const clientesporhora = await resCPH?.clientesPorHora
+      const date = searchParams.get('fecha')
+      const resCPH = await prisma.configuracion.findFirst({ where: { sucursalId } })
+      const clientesporhora = resCPH?.clientesPorHora ?? 0
+      
       const citas = await prisma.cita.findMany({
         select: {
           horaInicio: true,
@@ -114,6 +178,10 @@ export async function GET(req: Request) {
         where: {
           estado: 'confirmado',
           fecha: date ? new Date(date) : undefined,
+          sucursalId,
+          horaInicio: {
+            not: null,
+          }
         },
         orderBy: { createdAt: 'desc' },
       })
@@ -121,18 +189,13 @@ export async function GET(req: Request) {
       const hInicio = citas.map((c : any) => c.horaInicio?.toISOString().substring(11,16)).filter(Boolean)
       const hFin = citas.map((c:any) => c.horaFin?.toISOString().substring(11,16)).filter(Boolean)
       //en horasOcupadas obtener la hora que se repita 5 veces
-      const conteo = hInicio.reduce((acc:any, hora:any) => {
-        acc[hora] = (acc[hora] || 0) + 1
-        return acc
-      }, {} as Record<string, number>)
-
-      //const horasOcupadas = Object.keys(conteo).filter(h => conteo[h] >= clientesporhora)
 
       const horasOcupadas = await prisma.cita.groupBy({
         by: ['horaInicio'],
         where: {
           estado: 'confirmado',
           fecha: date ? new Date(date) : undefined,
+          sucursalId,
         },
         _count: {
           horaInicio: true,
@@ -147,8 +210,6 @@ export async function GET(req: Request) {
       })
       return NextResponse.json({
         success: true,
-        hora_inicio: hInicio,
-        hora_fin: hFin,
         horas_ocupadas: horasOcupadas.map((h:any) => h.horaInicio?.toISOString().split('T')[1].split('.')[0] || ''),
       })
     }

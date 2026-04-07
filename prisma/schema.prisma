@@ -246,7 +246,8 @@ model Configuracion {
 model SlotTrabajo {
   id              Int @id @default(autoincrement())
   hora            String
-
+  sucursalId  String?
+  sucursal   Sucursal? @relation(fields: [sucursalId], references: [id])
   configuracionId Int
   configuracion   Configuracion @relation(fields: [configuracionId], references: [id])
 }
@@ -280,4 +281,5 @@ model Sucursal {
   inventarios        Inventario[]
   movimientos        MovimientoInventario[]
   cortes             Corte[]
+  slotTrabajos       SlotTrabajo[]
 }

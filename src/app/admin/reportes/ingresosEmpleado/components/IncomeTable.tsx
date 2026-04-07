@@ -3,9 +3,10 @@ import { ReportEmpServDetail } from './types';
 
 interface IncomeTableProps {
   data: ReportEmpServDetail[];
+  nombre: string;
 }
 
-export function IncomeTable({ data }: IncomeTableProps) {
+export function IncomeTable({ data, nombre }: IncomeTableProps) {
   const formatDate = (dateString: string) => {
     if (!dateString) return ''
     const [year,month, day] = dateString.split('-')
@@ -54,7 +55,10 @@ const formatCurrency = (amount?: number) => {
         {data.length > 0 && (
           <tfoot>
             <tr className="bg-[#8B4513] text-white">
-              <td colSpan={2} className="py-3 px-4 font-bold text-right">
+              <td colSpan={1} className="py-3 px-4 font-bold text-right">
+                {nombre.toUpperCase()}
+              </td>
+              <td colSpan={1} className="py-3 px-4 font-bold text-right">
                 Total:
               </td>
               <td className="py-3 px-4 font-bold text-lg">

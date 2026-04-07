@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Inventario, Producto } from "./type";
 import SucursalSelector from "../components/SucursalSelector";
+import Cookies from "js-cookie";
 
 export default function InventarioModal({ onClose, onRefresh, inventario }: {onClose?: () => void, onRefresh?: () => void, inventario?: string}) {
   
@@ -10,14 +11,23 @@ export default function InventarioModal({ onClose, onRefresh, inventario }: {onC
   const [loading, setLoading] = useState(false)
   const [mensaje, setMensaje] = useState("")
   const [productos, setProductos] = useState<Producto[]>([])
-  
+  const [sucursalId, setSucursalId] = useState<string>('')
+  const sessionCookie = Cookies.get("session")
+  async function loadUserSesion(){
+    const session = JSON.parse(sessionCookie || '{}');
+    const id = session.id
+    const res = await fetch(`/api/usuario?id=${id}`)
+    const data = await res.json()
+    if (res.ok) setSucursalId(data.sucursalId || '')
+    else setMensaje(data.error || "Error al cargar sesión")
+  }
   async function inventarioId(id : string) {
     const res = await fetch(`/api/inventario?action=getInventarioId&id=${id}`)
     const data = await res.json()
     if (res.ok) setForm(data.data)
   }
   async function refreshList() {
-    const res = await fetch("/api/inventario?action=getinventario")
+    const res = await fetch(`/api/inventario?action=getAllInvBySucursalId&sucursalId=${sucursalId}`)
     const data = await res.json()
     if (res.ok) setInventarios(data.data)
     else setMensaje(data.error || "Error al refrescar inventarios")
@@ -100,11 +110,14 @@ export default function InventarioModal({ onClose, onRefresh, inventario }: {onC
     setLoading(false)
   }
   useEffect(() => {
-    refreshList()
+    loadUserSesion()
     refreshProductos()
     if (inventario)inventarioId(inventario||'')
   }, [inventario])
-
+  
+  useEffect(() => {
+    if(sucursalId)refreshList()
+  }, [sucursalId])
   return (
     <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-6 rounded-lg w-full max-w-3xl">
@@ -142,7 +155,7 @@ export default function InventarioModal({ onClose, onRefresh, inventario }: {onC
                 <select
                   id="productoId"
                   name="productoId"
-                  value={form.productoId}
+                  value={form?.productoId || ''}
                   onChange={handleChange}
                   className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                 >
@@ -158,7 +171,7 @@ export default function InventarioModal({ onClose, onRefresh, inventario }: {onC
                   type="number"
                   id="cantidad"
                   name="cantidad"
-                  value={form.cantidad}
+                  value={form?.cantidad}
                   onChange={handleChange}
                   className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                   required
