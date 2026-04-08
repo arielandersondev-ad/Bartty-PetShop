@@ -17,19 +17,22 @@ export async function POST(req: Request) {
   }
 }
 export async function PATCH(req: Request) {
-  const { id, activo } = await req.json()
+  const { id, nombre, lat, lng, activo } = await req.json()
   if (!id) {
-    return Response.json({ error: 'Error interno al obtener el id de la sucursal' }, { status: 500 })
+    return Response.json({ error: 'Error interno al obtener el id de la sucursal' }, { status: 400 })
   }
   try {
     await prisma.sucursal.update({
       where: { id },
       data: {
-        activo: activo,
+        nombre: nombre !== undefined ? nombre : undefined,
+        lat: lat !== undefined ? lat : undefined,
+        lng: lng !== undefined ? lng : undefined,
+        activo: activo !== undefined ? activo : undefined,
       }
     })
     return Response.json({ success: true })
   } catch (error) {
-    return Response.json({ error: 'Error interno al inactivar la sucursal' }, { status: 500 })
+    return Response.json({ error: 'Error interno al actualizar la sucursal' }, { status: 500 })
   }
 }

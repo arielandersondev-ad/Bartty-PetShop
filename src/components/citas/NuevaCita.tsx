@@ -46,6 +46,7 @@ export default function NuevaCita({clienteId, mascotas, onRefresh}: TNuevaCita) 
   const [ map, setMap ] = useState('')
   const [pickupCoords, setPickupCoords] = useState<{lat: number, lng: number} | null>(null)
   const [sucursalSelect, setSucursalSelect] = useState(false)
+  const [sucursalCord, setSucursalCord] = useState<{lat: number, lng: number} | null>(null)
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -140,11 +141,20 @@ export default function NuevaCita({clienteId, mascotas, onRefresh}: TNuevaCita) 
       hora_fin: horaFin 
     }))
   }
+  async function loadCord (value: any){
+    const res = await fetch(`/api/sucursal?action=byId&id=${value}`)
+    const data = await res.json()
+    return [data.sucursal.lat, data.sucursal.lng]
+  }
   const handleSucursal= (value: string) => {
     setMessage('')
     setLoading(false)
     setForm(prev => ({ ...prev, sucursalId: value }))
     setSucursalSelect(true)
+    loadCord(value).then(data => {
+      setSucursalCord({lat: data[0], lng: data[1]})
+    })
+    
   }
 
   return (
@@ -222,6 +232,7 @@ export default function NuevaCita({clienteId, mascotas, onRefresh}: TNuevaCita) 
                   });
                 }}
                 onClose={() => setMap('')}
+                center={sucursalCord?.lat && sucursalCord?.lng ? [sucursalCord.lat, sucursalCord.lng] : undefined}
               />
               )}
             </div>

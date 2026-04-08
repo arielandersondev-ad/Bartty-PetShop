@@ -28,7 +28,7 @@ export default function Configuracion() {
   const loadConfiguracion = async () => {
     const res = await fetch('/api/configuracion?action=all')
     const data = await res.json()
-    console.log('lista de configuracion: ',data)
+    //console.log('lista de configuracion: ',data)
   }
 
   useEffect(() => {
@@ -92,6 +92,9 @@ export default function Configuracion() {
         ⚙️ Configuración
       </h1>
       
+      <Sucursales/>
+      <GeneralConfig/>
+      <GaleriaCortes/>
       {/* Selector de Sucursal */}
       <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-xl p-4 mb-6 shadow-lg">
         <SucursalSelector onChange={(value) => setSucursalId(value)} />
@@ -101,83 +104,44 @@ export default function Configuracion() {
         <p className="text-center text-gray-500">Selecciona una sucursal para ver su configuración</p>
       ) : (
         <>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* CLIENTES POR HORA */}
-          <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-xl p-6 mb-8 shadow-lg">
-          <h2 className="text-xl font-semibold mb-4">
-            {clientesHora ? "Clientes por hora" : "Número de Clientes por Hora"}
-            {clientesHora}
-          </h2>
-          <div className="flex gap-4 items-center">
-            <input
-              type="number"
-              value={clientesPorHora}
-              onChange={(e) => setClientesPorHora(Number(e.target.value))}
-              className="
-                w-32
-                px-3 py-2
-                rounded-lg
-                bg-white/20
-                border border-amber-600/80
-                text-black
-                focus:outline-none
-                focus:ring-2
-                focus:ring-orange-400
-              "
-            />
-            <button
-              onClick={actualizarConfig}
-              className="
-                bg-orange-500
-                hover:bg-orange-600
-                px-5 py-2
-                rounded-lg
-                font-semibold
-                transition
-              "
-            >
-              Guardar
-            </button>
-          </div>
-        </div>
         {/* AGREGAR SLOT */}
-        <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-xl p-6 mb-8 shadow-lg">
-          <h2 className="text-xl font-semibold mb-4">
-            Agregar horario
-          </h2>
-          <div className="flex gap-4 items-center">
-            <input
-              type="time"
-              value={hora}
-              onChange={(e) => setHora(e.target.value)}
-              className="
-                px-3 py-2
-                rounded-lg
-                bg-white/20
-                border border-amber-600/80
-                text-black
-                focus:outline-none
-                focus:ring-2
-                focus:ring-orange-400
-              "
-            />
-            <button
-              onClick={crearSlot}
-              className="
-                bg-green-500
-                hover:bg-green-600
-                px-5 py-2
-                rounded-lg
-                font-semibold
-                transition
-              "
-            >
-              + Agregar
-            </button>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-xl p-6 mb-8 shadow-lg">
+            <h2 className="text-xl font-semibold mb-4">
+              Agregar horario
+            </h2>
+            <div className="flex gap-4 items-center">
+              <input
+                type="time"
+                value={hora}
+                onChange={(e) => setHora(e.target.value)}
+                className="
+                  px-3 py-2
+                  rounded-lg
+                  bg-white/20
+                  border border-amber-600/80
+                  text-black
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-orange-400
+                "
+              />
+              <button
+                onClick={crearSlot}
+                className="
+                  bg-green-500
+                  hover:bg-green-600
+                  px-5 py-2
+                  rounded-lg
+                  font-semibold
+                  transition
+                "
+              >
+                + Agregar
+              </button>
+            </div>
           </div>
         </div>
-        </div>
-
         {/* LISTA DE SLOTS */}
         <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-xl p-6 shadow-lg">
           <h2 className="text-xl font-semibold mb-6">
@@ -214,9 +178,6 @@ export default function Configuracion() {
         </div>
         </>
       )}
-      <GaleriaCortes/>
-      <Sucursales/>
-      <GeneralConfig/>
     </div>
   )
 }

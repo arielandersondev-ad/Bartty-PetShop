@@ -61,6 +61,7 @@ const DEFAULT_CENTER: [number, number] = [-16.50346977922804, -68.1628788751971]
 interface LocationPickerProps {
   onConfirm: (lat: number, lng: number) => void
   onClose: () => void
+  center?: [number, number]
 }
 
 function MapEvents({ onClick }: { onClick: (lat: number, lng: number) => void }) {
@@ -68,16 +69,16 @@ function MapEvents({ onClick }: { onClick: (lat: number, lng: number) => void })
   return null
 }
 
-export default function LocationPicker({ onConfirm, onClose }: LocationPickerProps) {
+export default function LocationPicker({ onConfirm, onClose, center }: LocationPickerProps) {
   const [position, setPosition]       = useState<[number, number] | null>(null)
-  const [mapCenter, setMapCenter]     = useState<[number, number]>(DEFAULT_CENTER)
+  const sucursalCenter: [number, number] = center || DEFAULT_CENTER
+  const [mapCenter, setMapCenter]     = useState<[number, number]>(sucursalCenter)
   const [isMounted, setIsMounted]     = useState(false)
   const [geoLoading, setGeoLoading]   = useState(false)
   const [geoError, setGeoError]       = useState<string | null>(null)
   const homePinIcon = useRef<any>(null)
   const userPinIcon = useRef<any>(null)
   const [triggerLocate, setTriggerLocate] = useState(0)
-  const [usingGPS, setUsingGPS] = useState(false)
   const [isValid, setIsValid] = useState(false)
   const [messageValid, setMessageValid] = useState('no selecciono una ubicación válida')
 
@@ -196,7 +197,7 @@ export default function LocationPicker({ onConfirm, onClose }: LocationPickerPro
       //onConfirm(picklat, picklng)
     }
   }
-  const confirmTarget = position ?? DEFAULT_CENTER
+  const confirmTarget = position ?? sucursalCenter
 
   return (
     <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -273,7 +274,6 @@ export default function LocationPicker({ onConfirm, onClose }: LocationPickerPro
                   setPosition([lat, lng])
                   setMapCenter([lat, lng])
                   setGeoLoading(false)
-                  setUsingGPS(true)
                   setIsValid(false)
                 }}
                 onError={() => {
@@ -285,7 +285,6 @@ export default function LocationPicker({ onConfirm, onClose }: LocationPickerPro
               <MapEvents onClick={(lat, lng) => {
                 setPosition([lat, lng])
                 setGeoError(null)
-                setUsingGPS(false)
                 setIsValid(false)
               }} />
 
@@ -293,7 +292,7 @@ export default function LocationPicker({ onConfirm, onClose }: LocationPickerPro
                 <Marker position={position} icon={userPinIcon.current} />
               )}
               {homePinIcon.current && (
-                <Marker position={DEFAULT_CENTER} icon={homePinIcon.current} />
+                <Marker position={sucursalCenter} icon={homePinIcon.current} />
               )}
             </MapContainer>
           )}
@@ -335,7 +334,7 @@ export default function LocationPicker({ onConfirm, onClose }: LocationPickerPro
               <button
                 type="button"
                 onClick={() => {
-                  handlerConfirm(confirmTarget[0], confirmTarget[1], DEFAULT_CENTER[0], DEFAULT_CENTER[1], 2)
+                  handlerConfirm(confirmTarget[0], confirmTarget[1], sucursalCenter[0], sucursalCenter[1], 2)
                 }}
                 disabled={!position}
                 className={`px-8 py-2 rounded-xl font-bold shadow-lg transition-all ${

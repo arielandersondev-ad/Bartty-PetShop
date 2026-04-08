@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 export default function Sucursales () {
   //ESTADOS
   const [sucursales, setSucursales] = useState<any[]>([])
+  const [isEditing, setIsEditing] = useState(false)
   const [formSucursal, setFormSucursal] = useState({
     nombre: "",
     coords: "",
@@ -27,6 +28,25 @@ export default function Sucursales () {
       console.error('Error al inactivar la sucursal:', error);
     }
   }
+
+  const handleSelectSucursal = (s: any) => {
+    setIsEditing(true)
+    setFormSucursal({
+      id: s.id,
+      nombre: s.nombre,
+      coords: `${s.lat}, ${s.lng}`
+    })
+  }
+
+  const handleCancelEdit = () => {
+    setIsEditing(false)
+    setFormSucursal({
+      nombre: "",
+      coords: "",
+      id: "",
+    })
+  }
+
   const handleChangeAgregarSucursal = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormSucursal({
       ...formSucursal,
@@ -45,28 +65,43 @@ export default function Sucursales () {
       return
     }
     try {
-      fetch('/api/configuracion/sucursal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: formSucursal.id,
-          nombre: formSucursal.nombre,
-          lat,
-          lng,
+      if (isEditing) {
+        // ACTUALIZAR
+        fetch('/api/configuracion/sucursal', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: formSucursal.id,
+            nombre: formSucursal.nombre,
+            lat,
+            lng,
+          })
+        }).then(() => {
+          loadSucursales()
+          handleCancelEdit()
         })
-      }).then(() => {
-        loadSucursales()
-      })
+      } else {
+        // AGREGAR
+        fetch('/api/configuracion/sucursal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: formSucursal.id,
+            nombre: formSucursal.nombre,
+            lat,
+            lng,
+          })
+        }).then(() => {
+          loadSucursales()
+          setFormSucursal({
+            nombre: "",
+            coords: "",
+            id: "",
+          })
+        })
+      }
     } catch (error) {
-      console.error('Error al agregar la sucursal:', error);
-    } finally {
-      setTimeout(() => {
-        setFormSucursal({
-          nombre: "",
-          coords: "",
-          id: "",
-        })
-      }, 500);
+      console.error('Error al procesar la sucursal:', error);
     }
   }
   //LOADERS
@@ -101,28 +136,40 @@ export default function Sucursales () {
               {sucursales.map((s: any) => (
                 <li
                   key={s.id}
+                  onClick={() => handleSelectSucursal(s)}
                   className={`
-                    px-3 py-2 rounded-lg ${s.activo ? 'bg-orange-50' : 'bg-red-500  transition-colors text-sm text-gray-700 border border-transparent'}
+                    px-3 py-2 rounded-lg cursor-pointer hover:shadow-md transition-all ${s.activo ? 'bg-orange-50 border-orange-100' : 'bg-red-50 text-red-700 border-red-100'} border flex items-center justify-between
                   `}
                 >
-                  📍{s.nombre}-🔑{s.id}
-                  {s.activo? (
-                    <button
-                      type="button"
-                      onClick={() => handleInactivarSucursal(s.id, false)}
-                      className="text-red-500 hover:text-red-600 text-sm border border-red-500 rounded-full px-2 py-1"
-                    >
-                      ✕
-                    </button>
-                  ):(
-                    <button
-                      type="button"
-                      onClick={() => {handleInactivarSucursal(s.id, true);console.log('press???')}}
-                      className="bg-green-500 text-white text-sm border border-green-500 rounded-full px-2 py-1"
-                    >
-                      Activar
-                    </button>
-                  )}
+                  <span className="flex-1">
+                    📍 {s.nombre} <span className="text-gray-400 text-xs ml-2">ID: {s.id}</span>
+                  </span>
+                  <div className="flex gap-2">
+                    {s.activo? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleInactivarSucursal(s.id, false);
+                        }}
+                        className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors"
+                        title="Desactivar"
+                      >
+                        ✕
+                      </button>
+                    ):(
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleInactivarSucursal(s.id, true);
+                        }}
+                        className="bg-green-500 text-white text-[10px] uppercase font-bold px-2 py-1 rounded-full hover:bg-green-600 transition-colors"
+                      >
+                        Activar
+                      </button>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -161,13 +208,24 @@ export default function Sucursales () {
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
           />
 
-          <button
-            type="button"
-            onClick={handleSubmitAgregarSucursal}
-            className="mt-2 w-full py-2 rounded-lg text-sm font-medium bg-[#D2691E] text-white hover:bg-[#b85c1a] transition-all shadow-md hover:shadow-lg"
-          >
-            + Agregar sucursal
-          </button>
+          <div className="flex gap-2 mt-2">
+            {isEditing && (
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                className="flex-1 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all w-auto px-2"
+              >
+                Cancelar
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleSubmitAgregarSucursal}
+              className={`flex-[2] py-2 rounded-lg text-sm font-medium ${isEditing ? 'bg-green-600 hover:bg-green-700' : 'bg-[#D2691E] hover:bg-[#b85c1a]'} text-white transition-all shadow-md hover:shadow-lg w-full`}
+            >
+              {isEditing ? '💾 Guardar cambios' : '+ Agregar sucursal'}
+            </button>
+          </div>
 
         </div>
       </div>
