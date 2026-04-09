@@ -4,8 +4,10 @@ import { DynamicTable, ColumnConfig, ActionButton } from '../components/DynamicT
 import { customStyles } from '@/styles/colors';
 import { Cita } from '@/types/citas';
 import Detailcita from './Detailcita';
-export default function CitasAdmin() {
+import { useCitas } from '@/features/citas/hooks/useCitas';
 
+export default function CitasAdmin() {
+  const { citas, loading, error } = useCitas();
   const [allcitas, setAllCitas] = useState<Cita[]>([])
   const [modal, setModal]  = useState("");
   const [detail, setDetail] = useState<Cita>({} as Cita);
@@ -100,7 +102,8 @@ export default function CitasAdmin() {
 
   async function fetchCitas() {
     try {
-      const res = await fetch('/api/citas');
+      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+      const res = await fetch(`${BACKEND_URL}/api/citas`);
       const data = await res.json();
       console.log('datos detail: ',data)
       setAllCitas(data);
@@ -116,9 +119,10 @@ export default function CitasAdmin() {
   }
 
   useEffect(() => {
-    const loadCitas = async () => {await fetchCitas();}
-    loadCitas();
-  }, [])
+    if (citas.length > 0) {
+      setAllCitas(citas);
+    }
+  }, [citas]);
 
   return (
     <div className='text-black bg-[#FFF8E1] mt-4 md:mt-10 overflow-x-hidden'>

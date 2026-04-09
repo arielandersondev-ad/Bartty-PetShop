@@ -1,0 +1,13 @@
+{
+  "name": "@peluqueria/db",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.ts",
+  "dependencies": {
+    "@prisma/client": "7.4.1"
+  },
+  "devDependencies": {
+    "prisma": "7.4.1",
+    "typescript": "^5.0.0"
+  }
+}
