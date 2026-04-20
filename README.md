@@ -1,38 +1,129 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# 🚀 Proyecto - Setup Inicial
 
-First, run the development server:
+Este proyecto utiliza Node.js + Prisma ORM.
+
+---
+
+## 📦 Requisitos
+
+* Node.js (v18 o superior recomendado)
+* npm o yarn
+* Base de datos (PostgreSQL/MySQL según el proyecto)
+
+---
+
+## ⚙️ Instalación
+
+Clona el repositorio:
+
+```bash
+git clone <URL_DEL_REPO>
+cd <NOMBRE_DEL_PROYECTO>
+```
+
+Instala dependencias:
+
+```bash
+npm install
+```
+
+---
+
+## 🔐 Variables de entorno
+
+Copia el archivo de ejemplo:
+
+```bash
+cp .env.example .env
+```
+
+Configura al menos:
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
+```
+
+---
+
+## 🗄️ Base de datos (Prisma) -> yo hago reset la primera vez
+
+### Opción 1: Setup normal
+
+```bash
+npx prisma migrate dev
+```
+
+### Opción 2: Reset completo (recomendado para pruebas y empezar con la base de datos en blanco)
+
+```bash
+npx prisma migrate reset
+```
+
+> ⚠️ Esto borra toda la base de datos
+
+---
+
+## ▶️ Ejecutar proyecto
+
+Modo desarrollo:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Modo producción:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🧪 Flujo rápido (copy-paste)
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm install
+cp .env.example .env
+npx prisma migrate dev
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛠️ Comandos útiles
 
-## Deploy on Vercel
+```bash
+# Generar cliente Prisma
+npx prisma generate
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Ver base de datos en GUI
+npx prisma studio
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Resetear base de datos
+npx prisma migrate reset
+```
 
-https://solo.trae.ai/invitation/QNzzF22K
+---
+
+## ⚠️ Problemas comunes
+
+* ❌ DATABASE_URL incorrecta
+* ❌ Base de datos no creada
+* ❌ Migraciones no ejecutadas
+* ❌ Puerto ocupado
+
+---
+
+## 📌 Notas
+
+* Prisma genera automáticamente el cliente después de migraciones
+* Usar `migrate reset` solo en desarrollo o la primera vez
+* Verifica que el servidor de base de datos esté corriendo
+
+---
+
+## 👨‍💻 Contacto
+
+Si tienes problemas, revisa este README o consulta al equipo.
