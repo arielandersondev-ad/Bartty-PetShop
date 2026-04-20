@@ -18,10 +18,14 @@ export default function CitasAdmin() {
     return serviciosFormatted
   }
   function formatDate(dateTime: string) {
-  const [date] = dateTime.split('T')
-  const parts = date.split('-')
-  return `${parts[2]}/${parts[1]}/${parts[0]}`
-}
+    const [date] = dateTime.split('T')
+    const parts = date.split('-')
+    return `${parts[2]}/${parts[1]}/${parts[0]}`
+  }
+  function formatTime(dateTime: string) {
+    const [, time] = dateTime.split('T')
+    return time.split('.')[0]
+  }
   const columns: ColumnConfig<Cita>[] = [
     {
       key: 'fecha',
@@ -32,18 +36,20 @@ export default function CitasAdmin() {
       render: (value, row) => formatDate(value),
     },
     {
-      key: 'hora_inicio',
+      key: 'horaInicio',
       label: 'Hora_inicio',
       type: 'text',
       sortable: true,
       searchable: true,
+      render: (value, row) => formatTime(value),
     },
     {
-      key: 'hora_fin',
+      key: 'horaFin',
       label: 'Hora_fin',
       type: 'text',
       sortable: true,
       searchable: true,
+      render: (value, row) => formatTime(value),
     },
     {
       key: 'cliente.nombre',
@@ -112,7 +118,7 @@ export default function CitasAdmin() {
     try {
       const res = await fetch(`/api/citas/?action=by_sucursal&id=${sucursalSesion||sucursalId}`);
       const data = await res.json();
-      //console.log('datos: ',data)
+      console.log('todas las citas: ',data)
       setAllCitas(data);
     } catch (error) {
       console.error('Error al obtener las citas:', error);

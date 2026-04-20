@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 
 export async function POST(req: Request) {
-  const { id, nombre, lat, lng } = await req.json()
+  const { id, nombre, lat, lng, distanciaMax } = await req.json()
   try {
     const res = await prisma.sucursal.create({
       data: {
@@ -9,6 +9,7 @@ export async function POST(req: Request) {
         nombre,
         lat,
         lng,
+        distanciaMax: distanciaMax !== undefined ? parseFloat(distanciaMax) : undefined,
       }
     })
     return Response.json({ sucursal: res })
@@ -17,7 +18,7 @@ export async function POST(req: Request) {
   }
 }
 export async function PATCH(req: Request) {
-  const { id, nombre, lat, lng, activo } = await req.json()
+  const { id, nombre, lat, lng, activo, distanciaMax } = await req.json()
   if (!id) {
     return Response.json({ error: 'Error interno al obtener el id de la sucursal' }, { status: 400 })
   }
@@ -29,6 +30,7 @@ export async function PATCH(req: Request) {
         lat: lat !== undefined ? lat : undefined,
         lng: lng !== undefined ? lng : undefined,
         activo: activo !== undefined ? activo : undefined,
+        distanciaMax: distanciaMax !== undefined ? parseFloat(distanciaMax) : undefined,
       }
     })
     return Response.json({ success: true })

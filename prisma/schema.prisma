@@ -270,6 +270,7 @@ model Sucursal {
   lng       Float?
   activo    Boolean  @default(true)
   createdAt DateTime @default(now())
+  distanciaMax     Float   @default(5.0)
 
   // Relaciones
   usuarios       Usuario[]

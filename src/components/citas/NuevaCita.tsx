@@ -233,6 +233,7 @@ export default function NuevaCita({clienteId, mascotas, onRefresh}: TNuevaCita) 
                 }}
                 onClose={() => setMap('')}
                 center={sucursalCord?.lat && sucursalCord?.lng ? [sucursalCord.lat, sucursalCord.lng] : undefined}
+                sucursalId={form.sucursalId || ''}
               />
               )}
             </div>

@@ -8,6 +8,7 @@ export default function Sucursales () {
     nombre: "",
     coords: "",
     id: "",
+    distanciaMax: "",
   })
   //HANDLERS
   const handleInactivarSucursal = async (id : any, activate: boolean) => {
@@ -34,7 +35,8 @@ export default function Sucursales () {
     setFormSucursal({
       id: s.id,
       nombre: s.nombre,
-      coords: `${s.lat}, ${s.lng}`
+      coords: `${s.lat}, ${s.lng}`,
+      distanciaMax: s.distanciaMax ? s.distanciaMax.toString() : "5.0"
     })
   }
 
@@ -44,6 +46,7 @@ export default function Sucursales () {
       nombre: "",
       coords: "",
       id: "",
+      distanciaMax: ""
     })
   }
 
@@ -75,6 +78,7 @@ export default function Sucursales () {
             nombre: formSucursal.nombre,
             lat,
             lng,
+            distanciaMax: parseFloat(formSucursal.distanciaMax)
           })
         }).then(() => {
           loadSucursales()
@@ -90,6 +94,7 @@ export default function Sucursales () {
             nombre: formSucursal.nombre,
             lat,
             lng,
+            distanciaMax: parseFloat(formSucursal.distanciaMax)
           })
         }).then(() => {
           loadSucursales()
@@ -97,6 +102,7 @@ export default function Sucursales () {
             nombre: "",
             coords: "",
             id: "",
+            distanciaMax: ""
           })
         })
       }
@@ -207,6 +213,18 @@ export default function Sucursales () {
             placeholder="🏪 Nombre: LaPaz-Perez"
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
           />
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-bold text-gray-500 uppercase px-1">Radio Máximo (KM)</label>
+            <input
+              name="distanciaMax"
+              value={formSucursal.distanciaMax}
+              onChange={handleChangeAgregarSucursal}
+              type="number"
+              step="0.1"
+              placeholder="📏 Radio Máx: 5.0 km"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+            />
+          </div>
 
           <div className="flex gap-2 mt-2">
             {isEditing && (

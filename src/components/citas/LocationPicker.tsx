@@ -62,6 +62,7 @@ interface LocationPickerProps {
   onConfirm: (lat: number, lng: number) => void
   onClose: () => void
   center?: [number, number]
+  sucursalId: string
 }
 
 function MapEvents({ onClick }: { onClick: (lat: number, lng: number) => void }) {
@@ -69,7 +70,7 @@ function MapEvents({ onClick }: { onClick: (lat: number, lng: number) => void })
   return null
 }
 
-export default function LocationPicker({ onConfirm, onClose, center }: LocationPickerProps) {
+export default function LocationPicker({ onConfirm, onClose, center, sucursalId }: LocationPickerProps) {
   const [position, setPosition]       = useState<[number, number] | null>(null)
   const sucursalCenter: [number, number] = center || DEFAULT_CENTER
   const [mapCenter, setMapCenter]     = useState<[number, number]>(sucursalCenter)
@@ -159,9 +160,7 @@ export default function LocationPicker({ onConfirm, onClose, center }: LocationP
   async function validateDistance (
     picklat: number,
     picklng: number,
-    centerlat: number,
-    centerlng: number,
-    distanciaMax: number
+    sucursalId: string
   ) {
     const res = await fetch('/api/recogida', {
       method: 'POST',
@@ -171,9 +170,7 @@ export default function LocationPicker({ onConfirm, onClose, center }: LocationP
       body: JSON.stringify({
         picklat,
         picklng,
-        centerlat,
-        centerlng,
-        distanciaMax,
+        sucursalId,
         action:'validacion',
       }),
     })
@@ -183,11 +180,9 @@ export default function LocationPicker({ onConfirm, onClose, center }: LocationP
   const handlerConfirm= async (
     picklat: number,
     picklng: number,
-    centerlat: number,
-    centerlng: number,
-    distanciaMax: number
+    sucursalId: string
   ) => {
-    const data = await validateDistance(picklat, picklng, centerlat, centerlng, distanciaMax)
+    const data = await validateDistance(picklat, picklng, sucursalId)
     console.log(data.message)
     if(data.habilitado === false){
       setIsValid(data.habilitado)
@@ -334,7 +329,7 @@ export default function LocationPicker({ onConfirm, onClose, center }: LocationP
               <button
                 type="button"
                 onClick={() => {
-                  handlerConfirm(confirmTarget[0], confirmTarget[1], sucursalCenter[0], sucursalCenter[1], 2)
+                  handlerConfirm(confirmTarget[0], confirmTarget[1], sucursalId)
                 }}
                 disabled={!position}
                 className={`px-8 py-2 rounded-xl font-bold shadow-lg transition-all ${
