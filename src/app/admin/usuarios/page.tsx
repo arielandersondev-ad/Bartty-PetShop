@@ -159,6 +159,7 @@ export default function Usuarios() {
       //activo: form.activo === 'true' ? true : false,
       action: isEdit ? 'update' : 'register'
     };
+    console.log('payload: ',payload)
     e.preventDefault()
     setLoading(true)
     setMensaje('')

@@ -60,20 +60,12 @@ export async function POST(req: Request) {
   const body = await req.json()
   const { email, password, nombre, apellido , rol, activo, ci, telefono, numero_referido, action, sucursal, } = body
   if (action === 'register') {
-    // Validar que no exista usuario
+    if (!sucursal && !body.sucursalId) return NextResponse.json({ error: 'Sucursal requerida' }, { status: 400 })
     const existingUser = await prisma.usuario.findUnique({where: {email}})
-
     if (existingUser) {
       return NextResponse.json({ error: 'Usuario ya existe' }, { status: 400 })
     }
-    if (!body.sucursalId) {
-      return NextResponse.json({ error: 'Sucursal requerida' }, { status: 400 })
-    }
-    const sucursalId = body.sucursalId
-    // Hashear contraseña
     const hashed = bcrypt.hashSync(password, 10)
-
-    // Insertar usuario
     const usuario = await prisma.usuario.create({
       data: {
         email,
@@ -85,7 +77,7 @@ export async function POST(req: Request) {
         ci,
         telefono,
         numeroReferido: numero_referido,
-        sucursalId,
+        sucursalId: sucursal || body.sucursalId,
       }
     })
 
@@ -97,6 +89,7 @@ export async function POST(req: Request) {
   }
 
   if (action === 'login') {
+    console.log("datos: ", body)
     const usuario = await prisma.usuario.findUnique({
       where: { email, sucursalId:sucursal },
       select: {
