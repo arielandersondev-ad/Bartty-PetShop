@@ -1,22 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { Inventario, Producto } from "./type";
+import SucursalSelector from "../components/SucursalSelector";
+import Cookies from "js-cookie";
 
 export default function InventarioModal({ onClose, onRefresh, inventario }: {onClose?: () => void, onRefresh?: () => void, inventario?: string}) {
   
   const [selectedId, setSelectedId] = useState<string | null>(inventario || null)
   const [ inventarios, setInventarios] = useState<Inventario[]>([])
-  const [form, setForm] = useState<Inventario>({ cantidad: 0, productoId: "", updatedAt: "" })
+  const [form, setForm] = useState<Inventario>({ sucursalId: "", cantidad: 0, productoId: "", updatedAt: "" })
   const [loading, setLoading] = useState(false)
   const [mensaje, setMensaje] = useState("")
   const [productos, setProductos] = useState<Producto[]>([])
- 
+  const [sucursalId, setSucursalId] = useState<string>('')
+  const sessionCookie = Cookies.get("session")
+  async function loadUserSesion(){
+    const session = JSON.parse(sessionCookie || '{}');
+    const id = session.id
+    const res = await fetch(`/api/usuario?id=${id}`)
+    const data = await res.json()
+    if (res.ok) setSucursalId(data.sucursalId || '')
+    else setMensaje(data.error || "Error al cargar sesión")
+  }
   async function inventarioId(id : string) {
     const res = await fetch(`/api/inventario?action=getInventarioId&id=${id}`)
     const data = await res.json()
     if (res.ok) setForm(data.data)
   }
   async function refreshList() {
-    const res = await fetch("/api/inventario?action=getinventario")
+    const res = await fetch(`/api/inventario?action=getAllInvBySucursalId&sucursalId=${sucursalId}`)
     const data = await res.json()
     if (res.ok) setInventarios(data.data)
     else setMensaje(data.error || "Error al refrescar inventarios")
@@ -34,7 +45,7 @@ export default function InventarioModal({ onClose, onRefresh, inventario }: {onC
 
   const onSelect = (i: Inventario) => {
     setSelectedId(i.id || i.productoId)
-    setForm({ cantidad: i.cantidad, productoId: i.productoId, updatedAt: i.updatedAt })
+    setForm({ sucursalId: i.sucursalId, cantidad: i.cantidad, productoId: i.productoId, updatedAt: i.updatedAt })
     setMensaje("")
   }
 
@@ -47,13 +58,13 @@ export default function InventarioModal({ onClose, onRefresh, inventario }: {onC
         const res = await fetch("/api/inventario", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "createInventario", cantidad: form.cantidad, productoId: form.productoId })
+          body: JSON.stringify({ action: "createInventario",sucursalId: form.sucursalId, cantidad: form.cantidad, productoId: form.productoId })
         })
         const data = await res.json()
         if (!res.ok) setMensaje(data.error || "Error al crear inventario")
         else {
           setMensaje("Inventario creado")
-          setForm({ cantidad: 0, productoId: "", updatedAt: "" })
+          setForm({ sucursalId: "", cantidad: 0, productoId: "", updatedAt: "" })
           onRefresh?.()
         }
       } else {
@@ -90,7 +101,7 @@ export default function InventarioModal({ onClose, onRefresh, inventario }: {onC
       else {
         setMensaje("Inventario eliminado")
         setSelectedId(null)
-        setForm({ cantidad: 0, productoId: "", updatedAt: "" })
+        setForm({ sucursalId: "", cantidad: 0, productoId: "", updatedAt: "" })
         refreshList()
       }
     } catch {
@@ -99,11 +110,14 @@ export default function InventarioModal({ onClose, onRefresh, inventario }: {onC
     setLoading(false)
   }
   useEffect(() => {
-    refreshList()
+    loadUserSesion()
     refreshProductos()
     if (inventario)inventarioId(inventario||'')
   }, [inventario])
-
+  
+  useEffect(() => {
+    if(sucursalId)refreshList()
+  }, [sucursalId])
   return (
     <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-6 rounded-lg w-full max-w-3xl">
@@ -131,12 +145,17 @@ export default function InventarioModal({ onClose, onRefresh, inventario }: {onC
           </div>
           <div>
             <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
+              <div>
+                <SucursalSelector
+                  onChange={(value) => setForm(prev => ({ ...prev, sucursalId: value }))}
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700">Producto</label>
                 <select
                   id="productoId"
                   name="productoId"
-                  value={form.productoId}
+                  value={form?.productoId || ''}
                   onChange={handleChange}
                   className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                 >
@@ -152,7 +171,7 @@ export default function InventarioModal({ onClose, onRefresh, inventario }: {onC
                   type="number"
                   id="cantidad"
                   name="cantidad"
-                  value={form.cantidad}
+                  value={form?.cantidad}
                   onChange={handleChange}
                   className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                   required
@@ -163,7 +182,7 @@ export default function InventarioModal({ onClose, onRefresh, inventario }: {onC
                   type="button"
                   onClick={() => {
                     setSelectedId(null)
-                    setForm({ cantidad: 0, productoId: "", updatedAt: "" })
+                    setForm({ sucursalId: "", cantidad: 0, productoId: "", updatedAt: "" })
                     setMensaje("")
                   }}
                   className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"

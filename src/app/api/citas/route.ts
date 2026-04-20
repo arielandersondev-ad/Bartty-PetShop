@@ -13,6 +13,9 @@ function toSnakeCita(c: any, includeRelations = false) {
     observaciones: c.observaciones ?? null,
     estilo_corte: c.estiloCorte ?? null,
     created_at: c.createdAt,
+    comprobante: c.comprobante ?? null,
+    pickupLat: c.pickupLat ?? null,
+    pickupLng: c.pickupLng ?? null,
   }
   if (!includeRelations) return base
   return {
@@ -27,10 +30,57 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const action = searchParams.get('action')
   const id = searchParams.get('id')
-  const date = searchParams.get('fecha')
+  const sucursalId = searchParams.get('sucursalId')
 
   try {
-
+    if (action === 'test'){
+      const resCPH = await prisma.configuracion.findFirst({ 
+        select: { clientesPorHora: true }, 
+        where: { sucursalId:'10001' } 
+      })
+      const horasTrabajp = await prisma.slotTrabajo.findMany({
+        where: {
+          sucursalId:'10002'
+        }
+      }).then((res:any) => res.length)
+      const fechasAgrupadas = await prisma.cita.groupBy({
+        by: ['fecha'],
+        where: {
+          estado: 'confirmado',
+          sucursalId:'10002'
+        },
+        _count: {
+          fecha: true
+        }
+      })
+      const fechas = await prisma.cita.findMany({
+        select:{
+          fecha: true,
+          sucursalId: true,
+          estado: true,
+        },
+        where: {
+          estado: 'confirmado',
+          sucursalId:'10002'
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+      const allfechasCitas = await prisma.cita.findMany({
+        select:{
+          fecha: true,
+          sucursalId: true,
+          estado: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+      return NextResponse.json({
+        /* fechasAgrupadas,
+        fechas,
+        allfechasCitas,
+        resCPH, */
+        horasTrabajp
+      })
+    }
     if (action === 'citasConfirmadas') {
       const citas = await prisma.cita.findMany({
         select:{
@@ -46,19 +96,30 @@ export async function GET(req: Request) {
       return NextResponse.json(citas.map((c: any) => toSnakeCita(c)))
     }
     if (action === 'fechasNoDisponibles') {
-      const resCPH = await prisma.configuracion.findFirst()
-      const clientesporhora = await resCPH?.clientesPorHora
-      const horasTrabajp = await prisma.slotTrabajo.findMany().then((res:any) => res.length-2)
+      if (!sucursalId) return NextResponse.json({
+        success: false,
+        message: 'SucursalId es requerido'
+      })
+      const resCPH = await prisma.configuracion.findFirst({ 
+        select: { clientesPorHora: true }, 
+        where: { sucursalId } 
+      })
+      const clientesporhora = resCPH?.clientesPorHora || 2
+      const horasTrabajp = await prisma.slotTrabajo.findMany({
+        where: {
+          sucursalId
+        }
+      }).then((res:any) => res.length)
       const fechasAgrupadas = await prisma.cita.groupBy({
         by: ['fecha'],
         where: {
-          estado: 'confirmado'
+          estado: 'confirmado',
+          sucursalId
         },
         _count: {
           fecha: true
         }
       })
-      console.log('deboug de fechas : ',fechasAgrupadas)
       const fechasNoDisponibles = fechasAgrupadas
         .filter((f:any) => f._count.fecha >= clientesporhora*horasTrabajp)
         .map((f:any) => f.fecha.toISOString().split('T')[0])
@@ -70,19 +131,26 @@ export async function GET(req: Request) {
       })
     }
     if (action === 'HorasNoDisponiblesbyDate') {
+      const date = searchParams.get('fecha')
+      const clienteHora = await prisma.configuracion.findFirst({ where: { sucursalId } })
+      const clientesporhora = clienteHora?.clientesPorHora || 2
       const fechasAgrupadas = await prisma.cita.groupBy({
         by: ['horaInicio'],
         where: {
-          estado: 'confirmado'
+          estado: 'confirmado',
+          fecha: date ? new Date(date) : undefined,
+          sucursalId,
         },
         _count: {
           horaInicio: true
         }
       })
-      console.log('deboug de fechas : ',fechasAgrupadas)
       const horasNoDisponibles = fechasAgrupadas
-        .filter((f:any) => f._count.horaInicio >= 4)
-        .map((f:any) => f.horaInicio?.toISOString().split('T')[1].split('.')[0] || '')
+        .filter((f:any) => f._count.horaInicio >= clientesporhora)
+        .map((f:any) => {
+          const horaCompleta = f.horaInicio?.toISOString().split('T')[1].split('.')[0] || ''
+          return horaCompleta.substring(0,5)
+        })
 
       return NextResponse.json({
         success: true,
@@ -98,8 +166,10 @@ export async function GET(req: Request) {
       return NextResponse.json(citas.map((c: any) => toSnakeCita(c)))
     }
     if (action === 'citasConfirmadasporFecha') {
-      const resCPH = await prisma.configuracion.findFirst()
-      const clientesporhora = await resCPH?.clientesPorHora
+      const date = searchParams.get('fecha')
+      const resCPH = await prisma.configuracion.findFirst({ where: { sucursalId } })
+      const clientesporhora = resCPH?.clientesPorHora ?? 0
+      
       const citas = await prisma.cita.findMany({
         select: {
           horaInicio: true,
@@ -108,6 +178,10 @@ export async function GET(req: Request) {
         where: {
           estado: 'confirmado',
           fecha: date ? new Date(date) : undefined,
+          sucursalId,
+          horaInicio: {
+            not: null,
+          }
         },
         orderBy: { createdAt: 'desc' },
       })
@@ -115,18 +189,13 @@ export async function GET(req: Request) {
       const hInicio = citas.map((c : any) => c.horaInicio?.toISOString().substring(11,16)).filter(Boolean)
       const hFin = citas.map((c:any) => c.horaFin?.toISOString().substring(11,16)).filter(Boolean)
       //en horasOcupadas obtener la hora que se repita 5 veces
-      const conteo = hInicio.reduce((acc:any, hora:any) => {
-        acc[hora] = (acc[hora] || 0) + 1
-        return acc
-      }, {} as Record<string, number>)
-
-      //const horasOcupadas = Object.keys(conteo).filter(h => conteo[h] >= clientesporhora)
 
       const horasOcupadas = await prisma.cita.groupBy({
         by: ['horaInicio'],
         where: {
           estado: 'confirmado',
           fecha: date ? new Date(date) : undefined,
+          sucursalId,
         },
         _count: {
           horaInicio: true,
@@ -141,8 +210,6 @@ export async function GET(req: Request) {
       })
       return NextResponse.json({
         success: true,
-        hora_inicio: hInicio,
-        hora_fin: hFin,
         horas_ocupadas: horasOcupadas.map((h:any) => h.horaInicio?.toISOString().split('T')[1].split('.')[0] || ''),
       })
     }
@@ -153,13 +220,13 @@ export async function GET(req: Request) {
       })
       return NextResponse.json(citas.map((c: any) => toSnakeCita(c)))
     }
-
     if (action === 'allbyCID') {
       const citas = await prisma.cita.findMany({
         where: { clienteId: id || undefined },
         include: {
           mascota: { select: { nombre: true } },
           cliente: { select: { nombre: true, apellidoPaterno: true } },
+          sucursal: { select: { nombre: true } },
         },
         orderBy: { createdAt: 'desc' },
       })
@@ -171,12 +238,13 @@ export async function GET(req: Request) {
           estado: c.estado,
           observaciones: c.observaciones,
           id: c.id,
+          sucursal_id: c.sucursalId,
+          sucursal: c.sucursal?.nombre,
           mascota: { nombre: c.mascota?.nombre },
           cliente: { nombre: c.cliente?.nombre, apellido_paterno: c.cliente?.apellidoPaterno ?? null },
         })),
       )
     }
-
     if (action === 'byid' && id) {
       const c = await prisma.cita.findUnique({
         where: { id },
@@ -188,20 +256,53 @@ export async function GET(req: Request) {
       if (!c) return NextResponse.json({ error: 'Cita no encontrada' }, { status: 404 })
       return NextResponse.json(toSnakeCita(c, true))
     }
+    if(action==='by_sucursal'&&id){
+      if(!id) return NextResponse.json({ error: 'ID requerido',id }, { status: 400 })
+      const citas = await prisma.cita.findMany({
+        where: { sucursalId: id || undefined },
+        include: {
+          mascota: { select: { nombre: true } },
+          cliente: { select: { nombre: true, apellidoPaterno: true, ci: true, telefono: true } },
+          servicios: { select: { servicio: true, valor: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+      return NextResponse.json(
+        citas.map((c: any) => ({
+          ...c,
+          mascota: { nombre: c.mascota?.nombre },
+          cliente: { 
+            nombre: c.cliente?.nombre, 
+            apellido_paterno: c.cliente?.apellidoPaterno ?? null,
+            ci: c.cliente?.ci,
+            telefono: c.cliente?.telefono
+          },
+          servicios: c.servicios?.map((s: any) => ({
+            nombre: s.servicio, 
+            precio: Number(s.valor),
+          })),
+        })),
+      )
+    }
 
     const citas = await prisma.cita.findMany({
       include: {
         mascota: { select: { nombre: true } },
-        cliente: { select: { nombre: true, apellidoPaterno: true } },
+        cliente: { select: { nombre: true, apellidoPaterno: true, ci: true, telefono: true } },
         servicios: { select: { servicio: true, valor: true } },
       },
       orderBy: { createdAt: 'desc' },
     })
     return NextResponse.json(
       citas.map((c: any) => ({
-        ...toSnakeCita(c),
+        ...c,
         mascota: { nombre: c.mascota?.nombre },
-        cliente: { nombre: c.cliente?.nombre, apellido_paterno: c.cliente?.apellidoPaterno ?? null },
+        cliente: { 
+          nombre: c.cliente?.nombre, 
+          apellido_paterno: c.cliente?.apellidoPaterno ?? null,
+          ci: c.cliente?.ci,
+          telefono: c.cliente?.telefono
+        },
         servicios: c.servicios?.map((s: any) => ({
           nombre: s.servicio, 
           precio: Number(s.valor),
@@ -215,19 +316,27 @@ export async function GET(req: Request) {
 
 export async function PATCH (req: Request) {
   const body = await req.json()
-  console.log('body: ',body)
   const { id, ...data } = body
   const dateOnly = data.fecha ? new Date(data.fecha) : undefined
   const isoDate = dateOnly ? dateOnly.toISOString().split('T')[0] : undefined
+  
+  // Función auxiliar para parsear la hora de forma segura
+  const parseTime = (timeStr: any) => {
+    if (!isoDate || typeof timeStr !== 'string') return undefined
+    const time = timeStr.substring(0, 5) // Asegura formato HH:mm
+    return new Date(`${isoDate}T${time}:00.000Z`)
+  }
+
   const dataFormat = {
     clienteId: data.cliente_id,
     mascotaId: data.mascota_id,
     fecha: dateOnly,
-    horaInicio: new Date(`${data.fecha}T${data.hora_inicio}`),
-    horaFin: new Date(`${data.fecha}T${data.hora_fin}`),  
+    horaInicio: parseTime(data.hora_inicio),
+    horaFin: parseTime(data.hora_fin),
     estado: data.estado,
     observaciones: data.observaciones,
     estiloCorte: data.estilo_corte,
+    comprobante: data.comprobante,
   }
   try {
     const cita = await prisma.cita.update({
@@ -236,33 +345,61 @@ export async function PATCH (req: Request) {
     })
     return NextResponse.json(toSnakeCita(cita))
   } catch (error: any) {
-    console.log('error: ',error)
+    console.error('Error en PATCH /api/citas:', error)
     return NextResponse.json({ error: error?.message || 'Error en el servidor' }, { status: 500 })
   }
 }
 export async function POST(req: Request) {
   const body = await req.json()
-  const { cliente_id, mascota_id, fecha, hora_inicio, hora_fin, estado, observaciones, estilo_corte } = body
+  const { cliente_id, mascota_id, fecha, hora_inicio, hora_fin, estado, observaciones, estilo_corte, comprobante, sucursalId } = body
   const dateOnly = new Date(fecha)
   const isoDate = dateOnly.toISOString().split('T')[0]
-  
+  if (!sucursalId) return NextResponse.json({ error: 'Sucursal requerida' }, { status: 400 })
+  const parseTime = (timeStr: any) => {
+    if (!isoDate || typeof timeStr !== 'string') return undefined
+    const time = timeStr.substring(0, 5)
+    return new Date(`${isoDate}T${time}:00.000Z`)
+  }
   const dataFormat = {
     clienteId: cliente_id,
     mascotaId: mascota_id,
     fecha: dateOnly,
-    horaInicio: isoDate && typeof hora_inicio === 'string' ? new Date(`${isoDate}T${hora_inicio}:00.000Z`) : undefined,
-    horaFin: isoDate && typeof hora_fin === 'string' ? new Date(`${isoDate}T${hora_fin}:00.000Z`) : undefined,
+    horaInicio: parseTime(hora_inicio),
+    horaFin: parseTime(hora_fin),
     estado,
     observaciones,
     estiloCorte: estilo_corte,
+    comprobante: comprobante,
+    pickupLat: body.pickupLat,
+    pickupLng: body.pickupLng,
+    sucursalId,
   }
 
   try {
     const cita = await prisma.cita.create({
       data: dataFormat,
-    })
-    return NextResponse.json(toSnakeCita(cita))
+      select: {
+        id: true,
+        clienteId: true,
+        mascotaId: true,
+        fecha: true,
+        horaInicio: true,
+        horaFin: true,
+        estado: true,
+        observaciones: true,
+        estiloCorte: true,
+        comprobante: true,
+        pickupLat: true,
+        pickupLng: true,
+        sucursalId: true,
+      },
+    }).then((cita) => {(console.log(cita))})
+    return NextResponse.json({
+      message: 'Cita creada correctamente',
+      data: cita
+    }, { status: 201 })
   } catch (error: any) {
+    console.error('Error en POST /api/citas:', error)
     return NextResponse.json({ error: error?.message || 'Error en el servidor' }, { status: 500 })
   }
 }

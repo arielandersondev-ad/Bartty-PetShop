@@ -5,8 +5,21 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url)
     const rol = searchParams.get('rol')
+    const action = searchParams.get('action')
     if (!rol) {
       return NextResponse.json({ message: 'es necesario el rol del empleado' }, { status: 400 })
+    }
+    if (action === 'empBySucursal') {
+      const sucursalId = searchParams.get('sucursalId')
+      if (!sucursalId)return NextResponse.json({ message: 'es necesario el sucursalId' }, { status: 400 })
+      const empleados = await prisma.usuario.findMany({
+        where: { 
+          rol: rol as any, 
+          activo: 'true',
+          sucursalId 
+        }
+      })
+      return NextResponse.json(empleados)
     }
     const empleados = await prisma.usuario.findMany({
       where: { rol: rol as any, activo: 'true' },

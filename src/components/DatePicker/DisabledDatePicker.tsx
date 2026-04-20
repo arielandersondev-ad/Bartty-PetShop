@@ -19,7 +19,8 @@ export default function DisabledDatePicker({
   value,
   onChange,
   disabledDates,
-}: DisabledDatePickerProps) {
+  sucursalId,
+}: DisabledDatePickerProps & { sucursalId: string }) {
   const [blocked, setBlocked] = useState<string[]>(disabledDates ?? []);
   const selectedDate = value ? toDate(value) : new Date();
 
@@ -28,10 +29,11 @@ export default function DisabledDatePicker({
       setBlocked(disabledDates);
       return;
     }
+    if (!sucursalId) return
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/citas?action=fechasNoDisponibles");
+        const res = await fetch(`/api/citas?action=fechasNoDisponibles&sucursalId=${sucursalId}`);
         const json = await res.json();
         if (!cancelled && json?.success && Array.isArray(json?.data)) {
           setBlocked(json.data as string[]);
@@ -43,7 +45,7 @@ export default function DisabledDatePicker({
     return () => {
       cancelled = true;
     };
-  }, [disabledDates]);
+  }, [disabledDates, sucursalId]);
 
   const blockedDates = useMemo(
     () => blocked.map(toDate),

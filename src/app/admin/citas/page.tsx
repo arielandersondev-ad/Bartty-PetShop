@@ -4,24 +4,24 @@ import { DynamicTable, ColumnConfig, ActionButton } from '../components/DynamicT
 import { customStyles } from '@/styles/colors';
 import { Cita } from '@/types/citas';
 import Detailcita from './Detailcita';
+import Cookies from 'js-cookie';
 export default function CitasAdmin() {
 
   const [allcitas, setAllCitas] = useState<Cita[]>([])
   const [modal, setModal]  = useState("");
   const [detail, setDetail] = useState<Cita>({} as Cita);
-  function formatDateDMY(value?: string | null): string {
-    if (!value) return '-'
-
-    const parts = value.split('-')
-    if (parts.length !== 3) return '-'
-
-    const [year, month, day] = parts
-    return `${day}-${month}-${year}`
-  }
+  const session = JSON.parse(Cookies.get('session') || '{}');
+  const {id} = session;
+  const [sucursalSesion,setSucursalSesion] = useState('')
   function formatServicios(servicios?: any[]) {
     const serviciosFormatted = servicios?.map((s: any) => s.nombre).join(', ')
     return serviciosFormatted
   }
+  function formatDate(dateTime: string) {
+  const [date] = dateTime.split('T')
+  const parts = date.split('-')
+  return `${parts[2]}/${parts[1]}/${parts[0]}`
+}
   const columns: ColumnConfig<Cita>[] = [
     {
       key: 'fecha',
@@ -29,7 +29,7 @@ export default function CitasAdmin() {
       type: 'date',
       sortable: true,
       searchable: true,
-      render: (value, row) => formatDateDMY(value),
+      render: (value, row) => formatDate(value),
     },
     {
       key: 'hora_inicio',
@@ -89,20 +89,30 @@ export default function CitasAdmin() {
       onClick: (row) => detallesEspecificos(row.id),
       variant: 'amarillo',
       show: () => true,
+    },
+    {
+      label: 'Comprobante',
+      onClick: (row) => {
+        setDetail(row);
+        setModal('comprobante');
+      },
+      variant: 'azul',
+      show: (row) => !!row.comprobante,
     }
   ];
 
   async function fetchCitaDetail(id: string) {
     const res = await fetch(`/api/citas/?action=byid&id=${id}`);
     const data = await res.json();
+    //console.log('datos detail: ',data)
     setDetail(Array.isArray(data) ? data[0] : data);
   }
 
-  async function fetchCitas() {
+  async function fetchCitas(sucursalId?: any) {
     try {
-      const res = await fetch('/api/citas');
+      const res = await fetch(`/api/citas/?action=by_sucursal&id=${sucursalSesion||sucursalId}`);
       const data = await res.json();
-      console.log('datos detail: ',data)
+      //console.log('datos: ',data)
       setAllCitas(data);
     } catch (error) {
       console.error('Error al obtener las citas:', error);
@@ -114,10 +124,16 @@ export default function CitasAdmin() {
     await fetchCitaDetail(id);
     setModal('detalles');
   }
-
+  const fetchSucursalId = async () => {
+    const res = await fetch(`/api/usuario/?id=${id}`);
+    const data = await res.json();
+    setSucursalSesion(data.sucursalId);
+    return data.sucursalId;
+  }
   useEffect(() => {
-    const loadCitas = async () => {await fetchCitas();}
-    loadCitas();
+    fetchSucursalId().then((sucursalId)=>{
+      fetchCitas(sucursalId);
+    })
   }, [])
 
   return (
@@ -170,6 +186,53 @@ export default function CitasAdmin() {
               onRefresh={fetchCitas}
             />
 
+          </div>
+        </div>
+      )}
+
+      {modal === 'comprobante' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border-2 border-[#D2691E] max-w-2xl w-full p-6 relative">
+            <button
+              className="absolute top-4 right-4 bg-gray-100 hover:bg-gray-200 text-gray-800 p-2 rounded-full transition-colors"
+              onClick={() => setModal('')}
+            >
+              <span className="text-xl">✕</span>
+            </button>
+            
+            <h3 className="text-xl font-bold text-[#8B4513] mb-4">Comprobante de Cita</h3>
+            
+            <div className="bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center min-h-[300px] border border-gray-200">
+              {detail.comprobante ? (
+                detail.comprobante.toLowerCase().endsWith('.pdf') ? (
+                  <iframe 
+                    src={detail.comprobante} 
+                    className="w-full h-[500px]" 
+                    title="Comprobante PDF"
+                  />
+                ) : (
+                  <img 
+                    src={detail.comprobante} 
+                    alt="Comprobante de pago" 
+                    className="max-w-full max-h-[70vh] object-contain"
+                  />
+                )
+              ) : (
+                <div className="flex flex-col items-center gap-3 text-gray-500">
+                  <span className="text-4xl">📁</span>
+                  <p className="font-medium">No hay un comprobante registrado</p>
+                </div>
+              )}
+            </div>
+            
+            <div className="mt-4 flex justify-end">
+              <button 
+                onClick={() => setModal('')}
+                className="bg-[#D2691E] hover:bg-[#8B4513] text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}

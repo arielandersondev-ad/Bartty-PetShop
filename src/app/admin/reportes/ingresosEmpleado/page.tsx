@@ -7,6 +7,8 @@ import { type DateRange, type ReportDataEmpServ } from './components/types';
 import { Empleado } from './components/types';
 import { SummaryCards } from './components/SummaryCards';
 import { PDFExportButton } from './components/PDFExportButton';
+import SucursalSelector from '../../components/SucursalSelector';
+import Cookies from 'js-cookie';
 
 export default function IngresosReportePage() {
   const [dataReport, setDataReport] = useState<ReportDataEmpServ>({
@@ -34,8 +36,14 @@ export default function IngresosReportePage() {
   function formatDate(date: Date) {
     return date.toISOString().split('T')[0];
   }
+
   async function fetcthEmp(rol: string) {
     const res = await fetch(`/api/empleados?rol=${rol}`)
+    const data = await res.json()
+    setEmpleados(data)
+  }
+  async function loadEmpleados(rol: string, sucursalId: string) {
+    const res = await fetch(`/api/empleados?action=empBySucursal&rol=${rol}&sucursalId=${sucursalId}`)
     const data = await res.json()
     setEmpleados(data)
   }
@@ -77,7 +85,19 @@ export default function IngresosReportePage() {
 
 
   useEffect(() => {
-    fetcthEmp('emp_servicio')
+    
+    //fetcthEmp('emp_servicio')
+    const sessionCookie = Cookies.get('session');
+    const sesion = JSON.parse(sessionCookie || '{}');
+    const id = sesion.id;
+    const loadSucursalUser = async () => {
+      const res = await fetch(`/api/usuario/?id=${id}`)
+      const data = await res.json()
+      return data.sucursalId
+    }
+    loadSucursalUser().then((sucursalId) => {
+      loadEmpleados('emp_servicio', sucursalId)
+    })
   }, [dataReport])
   
 return (
@@ -94,6 +114,9 @@ return (
       <div className="mb-6">
         <div className='flex flex-col md:flex-row md:flex-wrap gap-4'>
           <div className='flex flex-row gap-2'>
+            <SucursalSelector
+              onChange={(value) => {loadEmpleados('emp_servicio', value)}}
+            />
             <DateRangePicker 
               dateRange={dateRange}
               onDateRangeChange={setDateRange}
@@ -104,12 +127,15 @@ return (
               onChange={(e) => {setEmpleadoSeleccionado(e.target.value);setGenerado(false)}}
             >
               <option value="">empleado</option>
-              {empleados.map((empleado) => (
+              {empleados ? 
+              empleados.map((empleado) => (
                 <option 
                 key={empleado.id} 
                 value={empleado.id}
                 >{empleado.nombre}</option>
-              ))}
+              )) : (
+                <p className="text-[#8B4513]">No hay empleados disponibles</p>
+              )}
             </select>
           
           
@@ -150,7 +176,10 @@ return (
 
           <div className={`${customStyles.card.base} rounded-lg p-6`}>
             <h2 className="text-xl font-semibold text-[#8B4513] mb-4">Detalles de Transacciones</h2>
-            <IncomeTable data={dataReport.detalles} />
+            <IncomeTable 
+              data={dataReport.detalles}
+              nombre={dataReport.empleado}
+            />
           </div>
         </>
       )}

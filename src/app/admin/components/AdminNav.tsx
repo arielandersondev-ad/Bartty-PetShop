@@ -16,6 +16,7 @@ export default function AdminNav({ isSidebarOpen, setIsSidebarOpen,  }: AdminNav
   const [mounted, setMounted]=useState(false)
   const [nombre,setNombre] = useState('')
   const [rolSesion,setRolSesion] = useState('')
+  const [sucursalSesion,setSucursalSesion] = useState('')
   const {rol, id} = sesion;
   useEffect(() => {
     if (!['admin','emp_servicio','emp_recepcion'].includes(rol)) {
@@ -27,6 +28,7 @@ export default function AdminNav({ isSidebarOpen, setIsSidebarOpen,  }: AdminNav
       const data = await res.json();
       setNombre(data.nombre);
       setRolSesion(data.rol);
+      setSucursalSesion(data.sucursal);
     }
 
     if (id) getNombre();
@@ -80,10 +82,10 @@ export default function AdminNav({ isSidebarOpen, setIsSidebarOpen,  }: AdminNav
           {/* Usuario */}
           <div className="mb-10">
             <div className="text-black text-xl font-semibold">
-              {rolSesion || 'Administración'}
+              {nombre?nombre.toUpperCase():'Usuario'}
             </div>
             <div className="text-black/70 text-sm">
-              {nombre || 'Usuario'}
+              {rolSesion?rolSesion.toUpperCase() : 'Rol'} de {sucursalSesion || 'Sucursal'}
             </div>
 
             <div className="mt-4 h-[1px] bg-white/20"/>

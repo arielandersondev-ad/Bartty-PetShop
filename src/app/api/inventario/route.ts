@@ -48,6 +48,22 @@ export async function GET(req: Request) {
     })
     return NextResponse.json({ success: true, data: inventario })  
   }
+  if(action === 'getAllInvBySucursalId'){
+    const sucursalId = searchParams.get('sucursalId')
+    if (!sucursalId) return NextResponse.json({ error: "ID es obligatorio", data:sucursalId }, { status: 400 })
+    const inventarios = await prisma.inventario.findMany({
+      where: { sucursalId: sucursalId  || undefined },
+      include: { 
+        producto: {
+          include: {
+            categoria: true, 
+            unidadMedida: true 
+          }
+        }
+      }
+    })
+    return NextResponse.json({ success: true, data: inventarios })
+  }
 
   if (action === 'getinventario') {
     const productos = await prisma.inventario.findMany()
@@ -60,14 +76,15 @@ export async function POST (req: Request) {
   const { 
     action,
     productoId,
-    cantidad
+    cantidad,
+    sucursalId
   } = body
   if (action === 'createInventario') {
     if (!cantidad) {return NextResponse.json({ error: 'Cantidad es obligatoria' },{ status: 400 })}
     if (!productoId) {return NextResponse.json({ error: 'ProductoId es obligatorio' },{ status: 400 })}
-    
+    if (!sucursalId) return NextResponse.json({ error: 'SucursalId es obligatorio' },{ status: 400 })
     const inventario = await prisma.inventario.create({
-      data: { cantidad: Number(cantidad), producto: { connect: { id: productoId } } }
+      data: { sucursal: {connect: {id: sucursalId }}, cantidad: Number(cantidad), producto: { connect: { id: productoId } } }
     })
     return NextResponse.json({ success: true, data: inventario })
   }

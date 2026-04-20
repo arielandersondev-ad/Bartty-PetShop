@@ -26,39 +26,59 @@ export default function FirstRegister() {
     })
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  setLoading(true)
+  setMensaje('')
+
+  try {
+    const sucursalRes = await fetch('/api/configuracion/sucursal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: "10001",
+        nombre: "sucursal-1",
+        lat: 0,
+        lng: 0,
+      })
+    });
+
+    if (!sucursalRes.ok) {
+      setMensaje('Error al crear sucursal');
+      return;
+    }
+    
+    const sucursalData = await sucursalRes.json();
+    const id = sucursalData.sucursal.id
     const payload = {
       ...form,
-      action: 'register'
+      action: 'register',
+      sucursal: id,
     };
-    e.preventDefault()
-    setLoading(true)
-    setMensaje('')
 
-    try {
-      const res = await fetch('/api/usuario', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      })
+    const userRes = await fetch('/api/usuario', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
 
-      const data = await res.json()
+    const data = await userRes.json();
 
-      if (!res.ok) {
-        setMensaje(data.error || 'Error al crear usuario')
-      } else {
-        setMensaje('✅')
-        setForm(dataExample)
-      }
-    } catch (error) {
-      setMensaje('Error de conexión. Intenta de nuevo.')
-      console.error('Error:', error)
+    if (!userRes.ok) {
+      setMensaje(data.error || 'Error al crear usuario');
+    } else {
+      console.log(data)
+      setMensaje('✅');
+      setForm(dataExample);
     }
 
-    setLoading(false)
+  } catch (error) {
+    console.error(error);
+    setMensaje('Error de conexión. Intenta de nuevo.');
   }
+
+  setLoading(false);
+};
 
   
 return (
@@ -166,6 +186,7 @@ return (
                 onChange={handleChange}
                 value={form.rol}
               >
+                <option className="text-black" value="">SELECCIONAR</option>
                 <option className="text-black" value="admin">Admin</option>
                 <option className="text-black" value="emp_recepcion">Recepcionista</option>
                 <option className="text-black" value="emp_servicio">Servicio</option>
